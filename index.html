@@ -27,6 +27,12 @@
       text-rendering: optimizeLegibility;
     }
     * { box-sizing: border-box; }
+    html, body, .sidebar, .table-wrap, .materials-list-table-wrap, .cut-lines-wrap, .price-table-wrap {
+      scrollbar-width: none;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar, .sidebar::-webkit-scrollbar,
+    .table-wrap::-webkit-scrollbar, .materials-list-table-wrap::-webkit-scrollbar,
+    .cut-lines-wrap::-webkit-scrollbar, .price-table-wrap::-webkit-scrollbar { width: 0; height: 0; }
     body { margin: 0; color: var(--ink); background: var(--canvas); font-size: 14px; }
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; }
@@ -34,18 +40,50 @@
       outline: 3px solid rgba(237, 121, 0, .28); outline-offset: 2px;
     }
     .app { min-height: 100vh; }
+    .app.auth-locked { visibility: hidden; pointer-events: none; }
+    .auth-screen { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: var(--canvas); }
+    .auth-screen[hidden] { display: none; }
+    .auth-card { width: min(420px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: var(--shadow); }
+    .auth-brand { display: grid; justify-items: center; gap: 12px; margin-bottom: 24px; color: var(--ink); text-align: center; }
+    .auth-brand img { width: 76px; height: 76px; border: 2px solid #ed7900; border-radius: 50%; object-fit: cover; background: white; }
+    .auth-brand strong { font-size: 15px; letter-spacing: .08em; }
+    .auth-card h1 { font-family: inherit; font-size: 22px; font-weight: 700; letter-spacing: 0; }
+    .auth-card p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .auth-form { display: grid; gap: 13px; margin-top: 20px; }
+    .auth-form label, .user-create-form label, .user-password-form label { display: grid; gap: 6px; color: #45413d; font-size: 11px; font-weight: 650; }
+    .auth-error { min-height: 17px; margin: 0; color: var(--red) !important; }
+    .users-section { display: grid; gap: 14px; margin-top: 18px; }
+    .users-list { display: grid; gap: 10px; }
+    .user-row { display: grid; grid-template-columns: minmax(110px, .7fr) minmax(180px, 1fr) auto; gap: 10px; align-items: end; padding: 12px; border: 1px solid var(--line); border-radius: 9px; }
+    .user-row-name { align-self: center; font-weight: 650; overflow-wrap: anywhere; }
+    .user-create-form, .user-password-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: end; }
+    .user-create-form .btn, .user-password-form .btn { grid-column: 1 / -1; justify-self: start; }
+    .user-current { color: var(--muted); font-size: 10px; font-weight: 400; }
+    @media (max-width: 600px) {
+      .auth-card { padding: 22px; }
+      .user-row { grid-template-columns: 1fr; }
+      .user-create-form, .user-password-form { grid-template-columns: 1fr; }
+      .user-create-form .btn, .user-password-form .btn { grid-column: 1; }
+    }
+    body.nav-scroll-locked { overflow: hidden; }
+    .nav-backdrop { display: none; }
     .sidebar {
       position: fixed; inset: 0 auto 0 0; z-index: 5; display: flex; width: 246px;
       flex-direction: column; padding: 23px 16px 18px; color: #f4f1ed;
-      background: radial-gradient(ellipse at 0 0, rgba(237,121,0,.12), transparent 42%), #171717;
+      background: #171717;
       border-right: 1px solid rgba(255,255,255,.07);
+      overflow-x: hidden; transition: width .26s cubic-bezier(.2,.75,.25,1), transform .26s cubic-bezier(.2,.75,.25,1);
     }
+    .app.sidebar-collapsed .sidebar { width: 0; padding: 0; overflow: visible; border: 0; background: transparent; }
+    .app.sidebar-collapsed .main { margin-left: 0; }
     .brand { display: flex; gap: 12px; align-items: center; padding: 0 8px 25px; }
+    .brand-copy { min-width: 0; overflow: hidden; opacity: 1; transition: opacity .16s ease; white-space: nowrap; }
     .brand-mark {
       display: block; width: 55px; height: 55px; flex: 0 0 55px; object-fit: cover;
       border: 2px solid rgba(245,130,0,.8); border-radius: 50%;
       background: #fff; box-shadow: 0 0 0 4px rgba(237,121,0,.1);
     }
+    .brand-mark[role="button"] { cursor: pointer; }
     .brand-name { font-size: 11px; font-weight: 750; letter-spacing: .12em; }
     .brand-caption { margin-top: 5px; color: #b7afa7; font-size: 9px; letter-spacing: .12em; }
     .nav-label { padding: 0 12px 10px; color: #8d8780; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
@@ -55,6 +93,15 @@
       border: 0; border-radius: 9px; color: #c5c0ba; background: transparent; text-align: left;
       transition: background .16s, color .16s;
     }
+    .nav-text { overflow: hidden; opacity: 1; transition: opacity .14s ease; white-space: nowrap; }
+    .app.sidebar-collapsed .brand { justify-content: center; padding-right: 0; padding-left: 0; }
+    .app.sidebar-collapsed .brand-copy, .app.sidebar-collapsed .nav-label, .app.sidebar-collapsed .nav-text,
+    .app.sidebar-collapsed .sidebar-bottom { width: 0; height: 0; margin: 0; padding: 0; overflow: hidden; opacity: 0; }
+    .app.sidebar-collapsed .nav-label, .app.sidebar-collapsed .nav, .app.sidebar-collapsed .sidebar-bottom { display: none; }
+    .app.sidebar-collapsed .brand { position: absolute; top: 67px; left: 0; justify-content: flex-start; padding: 0; }
+    .app.sidebar-collapsed .brand-mark { width: 52px; height: 52px; flex-basis: 52px; }
+    .app.sidebar-collapsed .nav-item { justify-content: center; gap: 0; padding: 12px 5px; }
+    .app.sidebar-collapsed .nav-icon { width: 26px; font-size: 17px; }
     .nav-item:hover { color: white; background: rgba(255,255,255,.07); }
     .nav-item.active { color: #fff; background: linear-gradient(100deg, rgba(237,121,0,.24), rgba(237,121,0,.08)); box-shadow: inset 3px 0 #f58200; }
     .nav-icon { display: grid; width: 18px; place-items: center; color: #e9a34f; font-size: 16px; }
@@ -69,6 +116,7 @@
     }
     .crumb { color: var(--muted); font-size: 12px; }
     .crumb strong { color: var(--ink); font-weight: 650; }
+    .nav-label, .sidebar-bottom { transition: opacity .14s ease; }
     .top-actions { display: flex; align-items: center; gap: 10px; }
     .today { color: var(--muted); font-size: 12px; }
     .btn {
@@ -238,9 +286,53 @@
     .materials-list-footer { display: grid; grid-template-columns: 1.4fr .8fr; gap: 16px; align-items: start; }
     .materials-list-footer textarea { min-height: 100px; resize: vertical; }
     .materials-list-contact { padding: 12px 14px; border: 1px solid var(--line); border-radius: 9px; color: #555; background: #faf9f7; font-size: 11px; line-height: 1.7; }
+    .cut-calculator { display: grid; gap: 15px; }
+    .cut-card { padding: 18px; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: var(--shadow); }
+    .cut-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 15px; }
+    .cut-fields label { display: grid; gap: 6px; color: #45413d; font-size: 11px; font-weight: 650; }
+    .cut-fields input { width: 100%; }
+    .cut-lines-wrap { overflow-x: auto; }
+    .cut-lines { min-width: 1100px; }
+    .cut-lines th, .cut-lines td { padding: 8px 6px; }
+    .cut-lines input, .cut-lines select { width: 100%; min-width: 68px; min-height: 36px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #fff; }
+    .cut-lines .cut-name { min-width: 110px; }
+    .cut-lines .cut-edges { min-width: 220px; }
+    .cut-edge-tools { display: grid; gap: 5px; }
+    .cut-edge-tools select { min-width: 120px; }
+    .cut-edge-options { display: flex; flex-wrap: wrap; gap: 7px; }
+    .cut-edge-options label { display: flex; align-items: center; gap: 4px; color: #555; font-size: 9px; white-space: nowrap; }
+    .cut-edge-options input { width: auto; min-width: 0; min-height: auto; margin: 0; accent-color: var(--green); }
+    .cut-row-cost { min-width: 88px; font-weight: 700; white-space: nowrap; }
+    .cut-line-remove { width: 32px; height: 32px; border: 0; border-radius: 7px; color: var(--red); background: var(--red-pale); font-size: 17px; }
+    .cut-note { margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .cut-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, .7fr); gap: 15px; align-items: start; }
+    .cut-total-list { display: grid; gap: 10px; }
+    .cut-total-row { display: flex; justify-content: space-between; gap: 12px; color: #555; font-size: 12px; }
+    .cut-total-row strong { color: var(--ink); white-space: nowrap; }
+    .cut-grand-total { margin-top: 5px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--ink); font-size: 14px; font-weight: 700; }
+    .cut-grand-total strong { color: var(--green-dark); font-size: 21px; }
+    .cut-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cut-invalid { color: var(--red) !important; }
+    .price-list { display: grid; gap: 15px; }
+    .price-table-wrap { overflow-x: auto; }
+    .price-table { min-width: 760px; }
+    .price-table th, .price-table td { padding: 8px 6px; }
+    .price-table input, .price-table select { width: 100%; min-width: 85px; min-height: 36px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #fff; }
+    .price-table .price-name { min-width: 170px; }
+    .price-table .price-value { min-width: 110px; }
+    .price-type-note { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .labor-rate-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .labor-rate-grid label { display: grid; gap: 6px; color: #45413d; font-size: 11px; font-weight: 650; }
+    .labor-rate-grid input { width: 100%; }
+    .labor-mode-field { display: grid; max-width: 440px; gap: 6px; color: #45413d; font-size: 11px; font-weight: 650; }
+    .labor-mode-field .select { width: 100%; }
+    .labor-choice-fields { display: grid; gap: 10px; }
+    .labor-choice-fields[hidden] { display: none; }
     @media (max-width: 720px) {
       .materials-list-sheet { padding: 15px; }
       .materials-list-group, .materials-list-footer { grid-template-columns: 1fr; }
+      .cut-fields, .cut-bottom { grid-template-columns: 1fr; }
+      .labor-rate-grid { grid-template-columns: 1fr; }
     }
     @media print {
       @page { size: A4; margin: 10mm; }
@@ -266,6 +358,20 @@
       }
       .materials-list-table th, .materials-list-table td { padding: 6px; border-color: #777; }
       .materials-list-footer textarea { resize: none; }
+      body:has(.cut-calculator) { background: #fff; }
+      body:has(.cut-calculator) * { visibility: hidden !important; }
+      body:has(.cut-calculator) .cut-calculator,
+      body:has(.cut-calculator) .cut-calculator * { visibility: visible !important; }
+      body:has(.cut-calculator) .cut-calculator { position: absolute; inset: 0 auto auto 0; width: 100%; }
+      .cut-actions, .cut-line-remove { display: none !important; }
+      .cut-card { padding: 10px; border: 0; box-shadow: none; }
+      .cut-fields input, .cut-lines input, .cut-lines select { min-height: auto; padding: 2px; border-color: transparent; appearance: none; }
+      .cut-lines th, .cut-lines td { padding: 5px 3px; border-top: 1px solid #ccc; color: #000; font-size: 9px; }
+      .cut-note { color: #555; }
+      body:has(.price-list) * { visibility: hidden !important; }
+      body:has(.price-list) .price-list, body:has(.price-list) .price-list * { visibility: visible !important; }
+      body:has(.price-list) .price-list { position: absolute; inset: 0 auto auto 0; width: 100%; }
+      .price-list-actions, .price-row-remove { display: none !important; }
     }
     .toast { position: fixed; right: 24px; bottom: 24px; z-index: 20; max-width: min(360px, calc(100vw - 32px)); padding: 12px 16px; border: 1px solid #dfe6df; border-radius: 9px; color: #fff; background: #24372b; box-shadow: var(--shadow); font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .2s; }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -285,24 +391,41 @@
     @media (max-width: 1000px) {
       .sidebar { width: 215px; }
       .main { margin-left: 215px; }
+      .app.sidebar-collapsed .sidebar { width: 76px; }
+      .app.sidebar-collapsed .main { margin-left: 76px; }
       .content { padding-right: 24px; padding-left: 24px; }
       .topbar { padding-right: 24px; padding-left: 24px; }
       .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
       .note-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
     }
     @media (max-width: 720px) {
-      .sidebar { position: sticky; inset: 0 0 auto; width: 100%; height: auto; padding: 10px 12px 8px; }
+      .nav-backdrop { position: fixed; inset: 0; z-index: 8; display: block; border: 0; background: rgba(15,15,15,.48); opacity: 0; pointer-events: none; transition: opacity .24s ease; }
+      .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 9; width: 0; height: 100dvh; padding: 0; overflow: visible; border: 0; background: transparent; box-shadow: none; }
+      .app.nav-open .sidebar { width: min(300px, 86vw); padding: 18px 14px; overflow-y: auto; background: #171717; transform: translateX(0); }
+      .app.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
+      .app.sidebar-collapsed .sidebar { width: min(300px, 86vw); padding: 18px 14px; }
+      .app:not(.nav-open) .brand { position: absolute; top: 67px; left: 0; justify-content: flex-start; padding: 0; }
+      .app:not(.nav-open) .brand-mark { width: 52px; height: 52px; flex-basis: 52px; }
+      .app:not(.nav-open) .brand-copy, .app:not(.nav-open) .nav-label,
+      .app:not(.nav-open) .nav, .app:not(.nav-open) .sidebar-bottom { display: none; }
+      .app.sidebar-collapsed .main, .main { margin-left: 0; }
+      .app.sidebar-collapsed .brand { justify-content: flex-start; padding: 0 8px 25px; }
+      .app.sidebar-collapsed .brand-copy, .app.sidebar-collapsed .nav-label, .app.sidebar-collapsed .nav-text,
+      .app.sidebar-collapsed .sidebar-bottom { width: auto; height: auto; margin: initial; padding: initial; overflow: visible; opacity: 1; }
+      .app.sidebar-collapsed .nav-label, .app.sidebar-collapsed .nav, .app.sidebar-collapsed .sidebar-bottom { display: block; }
+      .app.sidebar-collapsed .nav { display: grid; gap: 5px; }
+      .app.sidebar-collapsed .nav-item { justify-content: flex-start; gap: 12px; padding: 11px 12px; }
+      .app.sidebar-collapsed .nav-icon { width: 18px; font-size: 16px; }
       .brand { padding: 0 4px 9px; }
       .brand-mark { width: 42px; height: 42px; flex-basis: 42px; border-width: 1.5px; }
       .brand-name { font-size: 10px; }
       .brand-caption { font-size: 8px; }
-      .nav-label, .sidebar-bottom { display: none; }
-      .nav { display: flex; overflow: auto; gap: 4px; scrollbar-width: none; }
-      .nav::-webkit-scrollbar { display: none; }
-      .nav-item { width: auto; min-width: max-content; gap: 6px; padding: 8px 10px; font-size: 11px; }
-      .nav-icon { width: auto; font-size: 13px; }
-      .main { margin-left: 0; }
-      .topbar { position: static; min-height: 56px; padding: 9px 16px; }
+      .nav-label { padding: 0 10px 9px; }
+      .nav { display: grid; gap: 4px; overflow: visible; }
+      .nav-item { width: 100%; min-width: 0; gap: 12px; padding: 12px 11px; font-size: 13px; }
+      .nav-icon { width: 20px; font-size: 16px; }
+      .sidebar-bottom { display: block; }
+      .topbar { position: sticky; top: 0; z-index: 4; min-height: 60px; padding: 9px 12px; }
       .today { display: none; }
       .btn { min-height: 35px; padding: 0 11px; }
       .content { padding: 25px 15px 40px; }
@@ -329,21 +452,27 @@
       .project-amount { grid-column: 2; text-align: left; }
     }
     @media (max-width: 390px) {
-      .nav-item { font-size: 10px; }
       .metrics { grid-template-columns: 1fr 1fr; }
       .metric { padding: 11px; }
       .metric-icon { display: none; }
       .dialog-form { grid-template-columns: 1fr; }
       .form-field.full, .dialog-actions { grid-column: 1; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      .sidebar, .nav-backdrop, .nav-text, .brand-copy { transition-duration: .01ms; }
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
+  <section class="auth-screen" id="auth-screen" aria-live="polite">
+    <div class="auth-card" id="auth-content"></div>
+  </section>
+  <div class="app auth-locked" inert>
+    <button class="nav-backdrop" id="nav-backdrop" type="button" aria-label="Cerrar menú" aria-hidden="true" tabindex="-1"></button>
+    <aside class="sidebar" id="sidebar-nav-panel">
       <div class="brand">
         <img class="brand-mark" src="imge/logo.png" alt="Logo de Bamino Construcciones">
-        <div><div class="brand-name">GESTIÓN DE OBRAS</div><div class="brand-caption">PANEL BAMINO</div></div>
+        <div class="brand-copy"><div class="brand-name">GESTIÓN DE OBRAS</div><div class="brand-caption">PANEL BAMINO</div></div>
       </div>
       <div class="nav-label">Espacio de trabajo</div>
       <nav class="nav" aria-label="Navegación principal" id="navigation"></nav>
@@ -355,7 +484,7 @@
     <main class="main">
       <header class="topbar">
         <div class="crumb"><span>Bamino Construcciones</span><span aria-hidden="true"> / </span><strong id="breadcrumb">Panel</strong></div>
-        <div class="top-actions"><span class="today" id="today"></span><button class="btn" id="export-backup" type="button">Descargar respaldo</button><button class="btn" id="import-backup" type="button">Restaurar respaldo</button><input id="backup-file" type="file" accept="application/json,.json" hidden><button class="btn btn-primary" id="new-project"><span aria-hidden="true">＋</span> Nueva obra</button></div>
+        <input id="backup-file" type="file" accept="application/json,.json" hidden>
       </header>
       <div class="content" id="content" aria-live="polite"></div>
     </main>
@@ -443,6 +572,8 @@
       "use strict";
       const STORAGE_KEY = "bamino-construcciones-crm-v1";
       const STORAGE_TIME_KEY = `${STORAGE_KEY}-saved-at`;
+      const AUTH_STORAGE_KEY = `${STORAGE_KEY}-users`;
+      const AUTH_SESSION_KEY = `${STORAGE_KEY}-session`;
       const DATABASE_NAME = "bamino-construcciones-database";
       const DATABASE_STORE = "app-data";
       let database = null;
@@ -469,7 +600,6 @@
         if (!("indexedDB" in window)) throw new Error("Este navegador no permite una base de datos local.");
         database = await openDatabase();
       } catch (error) {
-        databaseError = error;
         console.error("Error al iniciar la base de datos local:", error);
       }
       const navItems = [
@@ -484,13 +614,54 @@
         ["notes", "Notas", "▧"],
         ["stats", "Estadísticas", "◷"],
         ["inventory", "Inventario", "▦"],
-        ["materials-list", "Listado materiales", "▤"]
+        ["materials-list", "Listado materiales", "▤"],
+        ["cut-calculator", "Calculadora de costos", "⌁"],
+        ["material-prices", "Materiales y precios", "$"],
+        ["settings", "Configuración", "⚙"]
       ];
       const day = (offset) => {
         const date = new Date();
         date.setDate(date.getDate() + offset);
         return date.toISOString().slice(0, 10);
       };
+      const defaultMaterialCatalog = () => [
+        { id: "melamina-12", name: "Melamina 12 mm", type: "sheet", width: "183", length: "275", price: "" },
+        { id: "melamina-18", name: "Melamina 18 mm", type: "sheet", width: "183", length: "275", price: "" },
+        { id: "tapacanto", name: "Tapacanto", type: "linear", width: "", length: "", price: "" },
+        { id: "tornillos", name: "Tornillos", type: "unit", width: "", length: "", price: "" },
+        { id: "tarugos", name: "Tarugos", type: "unit", width: "", length: "", price: "" },
+        { id: "soportes", name: "Soportes", type: "unit", width: "", length: "", price: "" }
+      ];
+      const defaultLaborRates = () => ({ easy: "15", medium: "30", difficult: "40" });
+      function ensureLaborRates(documents) {
+        const rates = documents.laborRates && typeof documents.laborRates === "object" ? documents.laborRates : {};
+        documents.laborRates = {
+          easy: String(rates.easy ?? "15"),
+          medium: String(rates.medium ?? "30"),
+          difficult: String(rates.difficult ?? "40")
+        };
+      }
+      function ensureMaterialCatalog(documents) {
+        if (!Array.isArray(documents.materialCatalog)) {
+          const catalog = defaultMaterialCatalog();
+          const legacyCutList = documents.cutList;
+          if (legacyCutList?.board12) Object.assign(catalog[0], legacyCutList.board12);
+          if (legacyCutList?.board18) Object.assign(catalog[1], legacyCutList.board18);
+          if (legacyCutList && legacyCutList.edgePrice !== undefined) catalog[2].price = String(legacyCutList.edgePrice);
+          documents.materialCatalog = catalog;
+          return;
+        }
+        documents.materialCatalog = documents.materialCatalog
+          .filter((material) => material && typeof material === "object")
+          .map((material) => ({
+            id: String(material.id || crypto.randomUUID()),
+            name: String(material.name || ""),
+            type: ["sheet", "linear", "unit"].includes(material.type) ? material.type : "unit",
+            width: String(material.width ?? ""),
+            length: String(material.length ?? ""),
+            price: String(material.price ?? "")
+          }));
+      }
       const initialState = () => ({
         projects: [
           { id: crypto.randomUUID(), name: "Remodelación de vivienda", client: "Proyecto residencial", location: "Cuenca", date: day(2), status: "En ejecución", budget: 12800, paid: 6400, notes: "Acabados interiores y renovación de cocina." },
@@ -504,7 +675,7 @@
         ],
         goals: { works: { value: 3, target: 5, label: "Obras en ejecución" }, collections: { value: 2, target: 4, label: "Cobros completados" } },
         inventory: [],
-        documents: { clientBudget: null, materialsList: null }
+        documents: { clientBudget: null, materialsList: null, cutList: null, materialCatalog: defaultMaterialCatalog(), laborRates: defaultLaborRates() }
       });
       let state;
       let databaseState = null;
@@ -537,6 +708,9 @@
       if (!state.documents || typeof state.documents !== "object") state.documents = {};
       if (!state.documents.clientBudget || typeof state.documents.clientBudget !== "object") state.documents.clientBudget = null;
       if (!state.documents.materialsList || typeof state.documents.materialsList !== "object") state.documents.materialsList = null;
+      if (!state.documents.cutList || typeof state.documents.cutList !== "object") state.documents.cutList = null;
+      ensureMaterialCatalog(state.documents);
+      ensureLaborRates(state.documents);
       let needsClientMigration = !Array.isArray(state.clients);
       if (!Array.isArray(state.clients)) state.clients = [];
       const clientNumberKey = (value) => String(value ?? "").trim().replace(/^0+(?=\d)/, "");
@@ -571,8 +745,106 @@
       let currentPage = "dashboard";
       let calendarDate = new Date();
       let toastTimer;
+      let authUsers = [];
+      let currentAuthUserId = "";
+      let authStorageError = null;
+      try {
+        const storedUsers = localStorage.getItem(AUTH_STORAGE_KEY);
+        authUsers = storedUsers ? JSON.parse(storedUsers) : [];
+        if (!Array.isArray(authUsers) || authUsers.some((user) =>
+          !user || typeof user.id !== "string" || typeof user.username !== "string"
+          || typeof user.salt !== "string" || typeof user.passwordHash !== "string"
+          || !Number.isInteger(user.iterations)
+        )) throw new Error("La lista guardada de usuarios no tiene un formato válido.");
+      } catch (error) {
+        authUsers = [];
+        authStorageError = error;
+        console.error("No se pudo leer la lista local de usuarios:", error);
+      }
       const content = document.getElementById("content");
       const navigation = document.getElementById("navigation");
+      const authScreen = document.getElementById("auth-screen");
+      const authContent = document.getElementById("auth-content");
+      const app = document.querySelector(".app");
+      const main = document.querySelector(".main");
+      const sidebar = document.getElementById("sidebar-nav-panel");
+      const brand = sidebar.querySelector(".brand");
+      const brandMark = sidebar.querySelector(".brand-mark");
+      const navBackdrop = document.getElementById("nav-backdrop");
+      const SIDEBAR_COLLAPSED_KEY = "bamino-sidebar-collapsed";
+      const MOBILE_MENU_OPEN_KEY = "bamino-mobile-navigation-open";
+      let sidebarCollapsed = false;
+      let mobileMenuOpen = false;
+      try {
+        sidebarCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+        mobileMenuOpen = localStorage.getItem(MOBILE_MENU_OPEN_KEY) === "open";
+      } catch (error) {
+        console.error("No se pudo leer la preferencia de navegación:", error);
+      }
+      function syncSidebar() {
+        const isMobile = window.matchMedia("(max-width: 720px)").matches;
+        app.classList.toggle("sidebar-collapsed", !isMobile && sidebarCollapsed);
+        app.classList.toggle("nav-open", isMobile && mobileMenuOpen);
+        const drawerOpen = isMobile && mobileMenuOpen;
+        main.inert = drawerOpen;
+        sidebar.inert = false;
+        sidebar.setAttribute("aria-hidden", "false");
+        brand.inert = false;
+        navigation.inert = isMobile && !drawerOpen;
+        navBackdrop.setAttribute("aria-hidden", String(!drawerOpen));
+        document.body.classList.toggle("nav-scroll-locked", drawerOpen);
+        const expanded = isMobile ? drawerOpen : !sidebarCollapsed;
+        brandMark.tabIndex = 0;
+        brandMark.setAttribute("role", "button");
+        brandMark.setAttribute("aria-label", expanded ? "Cerrar menú" : "Abrir menú");
+      }
+      function toggleSidebar() {
+        const isMobile = window.matchMedia("(max-width: 720px)").matches;
+        if (isMobile) {
+          mobileMenuOpen = !mobileMenuOpen;
+          try {
+            localStorage.setItem(MOBILE_MENU_OPEN_KEY, mobileMenuOpen ? "open" : "closed");
+          } catch (error) {
+            console.error("No se pudo guardar el estado del menú móvil:", error);
+            notify("No se pudo guardar la preferencia del menú en este navegador.");
+          }
+          syncSidebar();
+          brandMark.focus();
+          return;
+        }
+        sidebarCollapsed = !sidebarCollapsed;
+        try {
+          localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(sidebarCollapsed));
+        } catch (error) {
+          console.error("No se pudo guardar el estado del menú:", error);
+          notify("No se pudo guardar la preferencia del menú en este navegador.");
+        }
+        syncSidebar();
+        brandMark.focus();
+      }
+      function closeMobileSidebar() {
+        if (!mobileMenuOpen || !window.matchMedia("(max-width: 720px)").matches) return;
+        mobileMenuOpen = false;
+        try {
+          localStorage.setItem(MOBILE_MENU_OPEN_KEY, "closed");
+        } catch (error) {
+          console.error("No se pudo guardar el estado del menú móvil:", error);
+        }
+        syncSidebar();
+        brandMark.focus();
+      }
+      syncSidebar();
+      brandMark.addEventListener("click", toggleSidebar);
+      brandMark.addEventListener("keydown", (event) => {
+        if (!["Enter", " "].includes(event.key)) return;
+        event.preventDefault();
+        toggleSidebar();
+      });
+      navBackdrop.addEventListener("click", closeMobileSidebar);
+      window.addEventListener("resize", syncSidebar);
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMobileSidebar();
+      });
       const projectDialog = document.getElementById("project-dialog");
       const clientDialog = document.getElementById("client-dialog");
       const clientForm = document.getElementById("client-form");
@@ -590,6 +862,140 @@
       const safe = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
       })[char]);
+      const PASSWORD_ITERATIONS = 310000;
+      function bytesToBase64(bytes) {
+        return btoa(String.fromCharCode(...bytes));
+      }
+      function base64ToBytes(value) {
+        return Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+      }
+      async function hashPassword(password, salt = crypto.getRandomValues(new Uint8Array(16)), iterations = PASSWORD_ITERATIONS) {
+        if (!crypto.subtle) throw new Error("Este navegador no permite proteger contraseñas en este archivo. Ábrelo en un navegador compatible.");
+        const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+        const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations, hash: "SHA-256" }, key, 256);
+        return { salt: bytesToBase64(salt), passwordHash: bytesToBase64(new Uint8Array(bits)), iterations };
+      }
+      function saveAuthUsers() {
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUsers));
+          authStorageError = null;
+          return true;
+        } catch (error) {
+          authStorageError = error;
+          console.error("No se pudieron guardar los usuarios locales:", error);
+          notify("No se pudieron guardar los usuarios. Revisa el almacenamiento del navegador.");
+          return false;
+        }
+      }
+      function setAuthError(message) {
+        const errorElement = authContent.querySelector("[data-auth-error]");
+        if (errorElement) errorElement.textContent = message;
+      }
+      function renderAuth(message = "") {
+        const firstUser = authUsers.length === 0;
+        authContent.innerHTML = `<div class="auth-brand"><img src="imge/logo.png" alt=""><strong>BAMINO CONSTRUCCIONES</strong></div>
+          <h1>${firstUser ? "Crear usuario inicial" : "Iniciar sesión"}</h1>
+          <p>${firstUser ? "Crea la primera cuenta para habilitar el acceso a la aplicación." : "Ingresa con tu usuario y contraseña para continuar."}</p>
+          <p>Este acceso se guarda en este navegador y dispositivo; no reemplaza la autenticación de un servidor.</p>
+          ${authStorageError ? `<p class="auth-error" role="alert">No se pudo acceder a los usuarios guardados. La aplicación permanecerá bloqueada. Revisa el almacenamiento del navegador.</p>` : ""}
+          ${authStorageError ? "" : `<form class="auth-form" data-auth-form="${firstUser ? "setup" : "login"}" autocomplete="on">
+            <label>Nombre de usuario<input class="field" name="username" type="text" minlength="3" maxlength="40" autocomplete="username" required autofocus></label>
+            <label>Contraseña<input class="field" name="password" type="password" minlength="8" autocomplete="${firstUser ? "new-password" : "current-password"}" required></label>
+            ${firstUser ? `<label>Repetir contraseña<input class="field" name="passwordConfirm" type="password" minlength="8" autocomplete="new-password" required></label>` : ""}
+            <p class="auth-error" data-auth-error role="alert">${safe(message)}</p>
+            <button class="btn btn-primary" type="submit">${firstUser ? "Crear usuario y entrar" : "Ingresar"}</button>
+          </form>`}`;
+        authScreen.hidden = false;
+        document.querySelector(".app").classList.add("auth-locked");
+        document.querySelector(".app").inert = true;
+        authContent.querySelector('[name="username"]')?.focus();
+      }
+      function unlockApplication(user) {
+        currentAuthUserId = user.id;
+        try {
+          sessionStorage.setItem(AUTH_SESSION_KEY, user.id);
+        } catch (error) {
+          console.error("No se pudo guardar la sesión local:", error);
+          notify("No se pudo mantener la sesión al recargar la página.");
+        }
+        authScreen.hidden = true;
+        document.querySelector(".app").classList.remove("auth-locked");
+        document.querySelector(".app").inert = false;
+      }
+      function lockApplication() {
+        currentAuthUserId = "";
+        try {
+          sessionStorage.removeItem(AUTH_SESSION_KEY);
+        } catch (error) {
+          console.error("No se pudo cerrar la sesión local:", error);
+        }
+        document.querySelector(".app").classList.add("auth-locked");
+        document.querySelector(".app").inert = true;
+        renderAuth();
+      }
+      async function initializeAuthentication() {
+        if (authStorageError) {
+          renderAuth();
+          return;
+        }
+        try {
+          const sessionId = sessionStorage.getItem(AUTH_SESSION_KEY);
+          const sessionUser = authUsers.find((user) => user.id === sessionId);
+          if (sessionUser) {
+            unlockApplication(sessionUser);
+            return;
+          }
+        } catch (error) {
+          console.error("No se pudo recuperar la sesión local:", error);
+        }
+        renderAuth();
+      }
+      authContent.addEventListener("submit", async (event) => {
+        const form = event.target.closest("[data-auth-form]");
+        if (!form) return;
+        event.preventDefault();
+        const data = new FormData(form);
+        const username = String(data.get("username") || "").trim();
+        const normalizedUsername = username.toLocaleLowerCase("es");
+        const password = String(data.get("password") || "");
+        const isSetup = form.dataset.authForm === "setup";
+        if (username.length < 3 || username.length > 40 || !/^[\p{L}\p{N}._-]+$/u.test(username)) {
+          setAuthError("El usuario debe tener entre 3 y 40 caracteres: letras, números, punto, guion o guion bajo.");
+          return;
+        }
+        if (password.length < 8) {
+          setAuthError("La contraseña debe tener al menos 8 caracteres.");
+          return;
+        }
+        try {
+          if (isSetup) {
+            if (authUsers.length) { renderAuth(); return; }
+            if (password !== data.get("passwordConfirm")) {
+              setAuthError("Las contraseñas no coinciden.");
+              return;
+            }
+            const credentials = await hashPassword(password);
+            const user = { id: crypto.randomUUID(), username, ...credentials };
+            authUsers = [user];
+            if (!saveAuthUsers()) { renderAuth("No se pudo guardar el usuario. Inténtalo nuevamente."); return; }
+            unlockApplication(user);
+            notify("Usuario creado. Ya puedes usar la aplicación.");
+            return;
+          }
+          const user = authUsers.find((item) => item.username.toLocaleLowerCase("es") === normalizedUsername);
+          if (!user) { setAuthError("Usuario o contraseña incorrectos."); return; }
+          const digest = await hashPassword(password, base64ToBytes(user.salt), user.iterations);
+          const actual = base64ToBytes(digest.passwordHash);
+          const expected = base64ToBytes(user.passwordHash);
+          const matches = actual.length === expected.length
+            && actual.reduce((difference, byte, index) => difference | (byte ^ expected[index]), 0) === 0;
+          if (!matches) { setAuthError("Usuario o contraseña incorrectos."); return; }
+          unlockApplication(user);
+        } catch (error) {
+          console.error("No se pudo validar la cuenta local:", error);
+          setAuthError("No se pudo verificar el acceso en este navegador. Revisa su compatibilidad e inténtalo otra vez.");
+        }
+      });
       const activeProjects = () => state.projects.filter((project) => project.status !== "Finalizada");
       const total = (key) => state.projects.reduce((sum, project) => sum + (Number(project[key]) || 0), 0);
       const balance = (project) => Math.max(0, Number(project.budget) - Number(project.paid));
@@ -657,7 +1063,54 @@
             }))
           };
           persist();
+          return;
         }
+        if (page === "cut-calculator") {
+          saveCutListDraft();
+          return;
+        }
+        if (page === "material-prices") {
+          saveMaterialCatalog();
+        }
+      }
+      function saveCutListDraft() {
+        const sheet = content.querySelector(".cut-calculator");
+        if (!sheet) return;
+        state.documents.cutList = {
+          client: sheet.querySelector('[data-cut-field="client"]').value,
+          project: sheet.querySelector('[data-cut-field="project"]').value,
+          laborMode: sheet.querySelector('[data-cut-field="labor-mode"]').value,
+          laborLevel: sheet.querySelector('[data-cut-field="labor-level"]').value,
+          laborAmount: sheet.querySelector('[data-cut-field="labor-amount"]').value,
+          rows: [...sheet.querySelectorAll("#cut-list-rows tr")].map((row) => ({
+            name: row.querySelector('[data-cut-field="name"]').value,
+            material: row.querySelector('[data-cut-field="material"]').value,
+            width: row.querySelector('[data-cut-field="width"]').value,
+            length: row.querySelector('[data-cut-field="length"]').value,
+            quantity: row.querySelector('[data-cut-field="quantity"]').value,
+            edgeMaterial: row.querySelector('[data-cut-field="edge-material"]').value,
+            edges: [...row.querySelectorAll('[data-cut-edge]:checked')].map((input) => input.dataset.cutEdge)
+          }))
+        };
+        persist();
+      }
+      function saveMaterialCatalog() {
+        const sheet = content.querySelector(".price-list");
+        if (!sheet) return;
+        state.documents.materialCatalog = [...sheet.querySelectorAll("[data-material-row]")].map((row) => ({
+          id: row.dataset.materialRow,
+          name: row.querySelector('[data-material-field="name"]').value.trim(),
+          type: row.querySelector('[data-material-field="type"]').value,
+          width: row.querySelector('[data-material-field="width"]').value,
+          length: row.querySelector('[data-material-field="length"]').value,
+          price: row.querySelector('[data-material-field="price"]').value
+        }));
+        state.documents.laborRates = {
+          easy: sheet.querySelector('[data-labor-rate="easy"]').value,
+          medium: sheet.querySelector('[data-labor-rate="medium"]').value,
+          difficult: sheet.querySelector('[data-labor-rate="difficult"]').value
+        };
+        persist();
       }
       function downloadBackup() {
         const backup = {
@@ -696,6 +1149,9 @@
         if (!state.documents || typeof state.documents !== "object") state.documents = {};
         if (!state.documents.clientBudget || typeof state.documents.clientBudget !== "object") state.documents.clientBudget = null;
         if (!state.documents.materialsList || typeof state.documents.materialsList !== "object") state.documents.materialsList = null;
+        if (!state.documents.cutList || typeof state.documents.cutList !== "object") state.documents.cutList = null;
+        ensureMaterialCatalog(state.documents);
+        ensureLaborRates(state.documents);
         persist();
         render();
         notify("Respaldo restaurado correctamente.");
@@ -742,7 +1198,7 @@
       }
       function renderNav() {
         navigation.innerHTML = navItems.map(([id, label, icon]) =>
-          `<button class="nav-item${currentPage === id ? " active" : ""}" type="button" data-page="${id}"${currentPage === id ? ' aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${icon}</span>${label}</button>`
+          `<button class="nav-item${currentPage === id ? " active" : ""}" type="button" data-page="${id}" title="${label}" aria-label="${label}"${currentPage === id ? ' aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${icon}</span><span class="nav-text">${label}</span></button>`
         ).join("");
       }
       function heading(kicker, title, description, action = "") {
@@ -1006,6 +1462,121 @@
           <td><button type="button" class="materials-list-table__remove" data-remove-material-row aria-label="Eliminar fila">×</button></td>
         </tr>`;
       }
+      function cutListRow(item = {}) {
+        const catalog = state.documents.materialCatalog;
+        const legacyId = item.material === "18" ? "melamina-18" : item.material === "12" ? "melamina-12" : "";
+        const selectedMaterial = catalog.some((material) => material.id === item.material)
+          ? item.material
+          : legacyId;
+        const materialOptions = catalog.map((material) =>
+          `<option value="${safe(material.id)}"${material.id === selectedMaterial ? " selected" : ""}>${safe(material.name)} · ${material.type === "sheet" ? "placa/m²" : material.type === "linear" ? "metro" : "unidad"}</option>`
+        ).join("");
+        const edgeMaterials = catalog.filter((material) => material.type === "linear");
+        const selectedEdgeMaterial = edgeMaterials.some((material) => material.id === item.edgeMaterial)
+          ? item.edgeMaterial
+          : edgeMaterials[0]?.id || "";
+        const edges = Array.isArray(item.edges) ? item.edges : [];
+        const edgeOption = (key, label) => `<label><input type="checkbox" data-cut-edge="${key}"${edges.includes(key) ? " checked" : ""}>${label}</label>`;
+        return `<tr>
+          <td><input class="cut-name" type="text" maxlength="70" value="${safe(item.name || "")}" data-cut-field="name" aria-label="Nombre de la pieza" placeholder="Ej. Puerta"></td>
+          <td><select data-cut-field="material" aria-label="Material"><option value="">Elegir material</option>${materialOptions}</select></td>
+          <td data-cut-dimension><input type="number" min="0" step="any" value="${safe(item.width ?? "")}" data-cut-field="width" aria-label="Ancho de corte en centímetros" placeholder="cm"></td>
+          <td data-cut-dimension><input type="number" min="0" step="any" value="${safe(item.length ?? "")}" data-cut-field="length" aria-label="Largo de corte en centímetros" placeholder="cm"></td>
+          <td><input type="number" min="0" step="any" value="${safe(item.quantity ?? "")}" data-cut-field="quantity" aria-label="Cantidad o metros" placeholder="Cantidad"></td>
+          <td class="cut-edges"><div class="cut-edge-tools"><select data-cut-field="edge-material" aria-label="Tapacanto">${edgeMaterials.map((material) => `<option value="${safe(material.id)}"${material.id === selectedEdgeMaterial ? " selected" : ""}>${safe(material.name)}</option>`).join("")}</select><div class="cut-edge-options">${edgeOption("length1", "Largo 1")}${edgeOption("length2", "Largo 2")}${edgeOption("width1", "Ancho 1")}${edgeOption("width2", "Ancho 2")}</div></div></td>
+          <td class="cut-row-cost" data-cut-row-cost>—</td>
+          <td><button class="cut-line-remove" type="button" data-cut-remove aria-label="Eliminar corte">×</button></td>
+        </tr>`;
+      }
+      function materialPriceRow(material) {
+        const type = ["sheet", "linear", "unit"].includes(material.type) ? material.type : "unit";
+        return `<tr data-material-row="${safe(material.id)}">
+          <td><input class="price-name" type="text" maxlength="80" data-material-field="name" value="${safe(material.name)}" aria-label="Nombre del material" placeholder="Nombre del material"></td>
+          <td><select data-material-field="type" aria-label="Tipo de material"><option value="sheet"${type === "sheet" ? " selected" : ""}>Placa (precio por placa)</option><option value="linear"${type === "linear" ? " selected" : ""}>Metro lineal</option><option value="unit"${type === "unit" ? " selected" : ""}>Unidad</option></select></td>
+          <td><input type="number" min="0" step="any" data-material-field="width" value="${safe(material.width ?? "")}" aria-label="Ancho de placa en centímetros" placeholder="cm"></td>
+          <td><input type="number" min="0" step="any" data-material-field="length" value="${safe(material.length ?? "")}" aria-label="Largo de placa en centímetros" placeholder="cm"></td>
+          <td><input class="price-value" type="number" min="0" step="any" data-material-field="price" value="${safe(material.price ?? "")}" aria-label="Precio del material" placeholder="$"></td>
+          <td><button class="cut-line-remove price-row-remove" type="button" data-material-remove aria-label="Eliminar ${safe(material.name)}">×</button></td>
+        </tr>`;
+      }
+      function materialPricesPage() {
+        const materials = state.documents.materialCatalog;
+        const laborRates = state.documents.laborRates;
+        return `${heading("Catálogo", "Materiales y precios", "Actualiza aquí las medidas y los precios; los cortes los usarán automáticamente.", `<button class="btn btn-primary" type="button" data-material-add>＋ Agregar material</button>`)}
+          <section class="price-list" aria-label="Catálogo de materiales y precios">
+            <div class="cut-card">
+              <div class="card-head"><div><h2 class="card-title">Lista de materiales</h2><div class="card-hint">Placas, tapacantos y artículos por unidad. Los cambios se guardan automáticamente.</div></div></div>
+              <div class="price-table-wrap"><table class="price-table"><thead><tr><th>MATERIAL</th><th>SE COBRA POR</th><th>ANCHO PLACA (cm)</th><th>LARGO PLACA (cm)</th><th>PRECIO ($ / PLACA, METRO O UNIDAD)</th><th></th></tr></thead><tbody id="material-price-rows">${materials.map((material) => materialPriceRow(material)).join("")}</tbody></table></div>
+              <p class="price-type-note">Para las melaminas, escribe el precio de la placa y sus medidas. Para artículos por metro o unidad, solo necesitas el precio individual; las medidas de placa no se usan.</p>
+            </div>
+            <div class="cut-card">
+              <div class="card-head"><div><h2 class="card-title">Porcentajes de mano de obra</h2><div class="card-hint">Se aplican sobre el costo total de los materiales de cada cálculo.</div></div></div>
+              <div class="labor-rate-grid">
+                <label>Fácil (%)<input class="field" type="number" min="0" max="100" step="any" data-labor-rate="easy" value="${safe(laborRates.easy)}"></label>
+                <label>Medio (%)<input class="field" type="number" min="0" max="100" step="any" data-labor-rate="medium" value="${safe(laborRates.medium)}"></label>
+                <label>Difícil (%)<input class="field" type="number" min="0" max="100" step="any" data-labor-rate="difficult" value="${safe(laborRates.difficult)}"></label>
+              </div>
+              <p class="price-type-note">Estos porcentajes se guardan automáticamente. También puedes elegir un monto fijo de mano de obra en la calculadora.</p>
+            </div>
+          </section>`;
+      }
+      function cutCalculatorPage() {
+        const draft = state.documents.cutList || {};
+        const rows = Array.isArray(draft.rows) ? draft.rows : [{}];
+        const laborMode = draft.laborMode === "fixed" ? "fixed" : "percentage";
+        const laborLevel = ["easy", "medium", "difficult"].includes(draft.laborLevel) ? draft.laborLevel : "easy";
+        const laborRates = state.documents.laborRates;
+        return `${heading("Cortes y materiales", "Calculadora de costos", "Agrega los materiales y cantidades de la obra; el total se calcula con tu lista de precios.")}
+          <section class="cut-calculator" aria-label="Calculadora de cortes de melamina">
+            <div class="cut-card">
+              <div class="cut-fields">
+                <label>Cliente (opcional)<input class="field" type="text" maxlength="80" data-cut-field="client" value="${safe(draft.client || "")}" placeholder="Nombre del cliente"></label>
+                <label>Obra (opcional)<input class="field" type="text" maxlength="80" data-cut-field="project" value="${safe(draft.project || "")}" placeholder="Nombre de la obra"></label>
+              </div>
+              <div class="card-head"><div><h2 class="card-title">Lista de materiales y cortes</h2><div class="card-hint">Elige un material, indica las medidas o la cantidad y se calcula su costo.</div></div><button class="btn" type="button" data-cut-add>＋ Agregar a la lista</button></div>
+              <div class="cut-lines-wrap"><table class="cut-lines"><thead><tr><th>DESCRIPCIÓN</th><th>MATERIAL</th><th>ANCHO (cm)</th><th>LARGO (cm)</th><th>CANT. / m</th><th>TAPACANTO DE PLACA</th><th>COSTO</th><th></th></tr></thead><tbody id="cut-list-rows">${rows.map((row) => cutListRow(row)).join("")}</tbody></table></div>
+              <p class="cut-note">Melamina: se cobra solo el área de los cortes, sin sumar la placa ni los sobrantes. Tornillos, tarugos y soportes: cantidad × precio unitario. Metro lineal: metros × precio por metro. El cálculo no acomoda los cortes ni incluye el ancho del disco.</p>
+            </div>
+            <div class="cut-card">
+              <div class="card-head"><div><h2 class="card-title">Mano de obra</h2><div class="card-hint">El porcentaje se calcula sobre la suma de materiales y tapacanto.</div></div></div>
+              <label class="labor-mode-field">Forma de calcular
+                <select class="select" data-cut-field="labor-mode" aria-label="Forma de calcular la mano de obra">
+                  <option value="percentage"${laborMode === "percentage" ? " selected" : ""}>Porcentaje del total de materiales</option>
+                  <option value="fixed"${laborMode === "fixed" ? " selected" : ""}>Ingresar monto directamente</option>
+                </select>
+              </label>
+              <div class="cut-fields labor-choice-fields" data-cut-labor-percentage${laborMode === "fixed" ? " hidden" : ""}>
+                <label>Nivel de trabajo
+                  <select class="select" data-cut-field="labor-level" aria-label="Nivel de mano de obra">
+                    <option value="easy"${laborLevel === "easy" ? " selected" : ""}>Fácil · ${safe(laborRates.easy)}%</option>
+                    <option value="medium"${laborLevel === "medium" ? " selected" : ""}>Medio · ${safe(laborRates.medium)}%</option>
+                    <option value="difficult"${laborLevel === "difficult" ? " selected" : ""}>Difícil · ${safe(laborRates.difficult)}%</option>
+                  </select>
+                </label>
+                <p class="cut-note">Puedes cambiar estos porcentajes en la sección “Materiales y precios”.</p>
+              </div>
+              <div class="cut-fields labor-choice-fields" data-cut-labor-fixed${laborMode !== "fixed" ? " hidden" : ""}>
+                <label>Monto de mano de obra ($)<input class="field" type="number" min="0" step="any" data-cut-field="labor-amount" value="${safe(draft.laborAmount ?? "")}" placeholder="0.00"></label>
+              </div>
+            </div>
+            <div class="cut-bottom">
+              <div class="cut-card">
+                <div class="cut-total-list">
+                  <div class="card-head" style="margin-bottom:0"><h2 class="card-title">Materiales requeridos</h2></div>
+                  <div data-cut-material-summary></div>
+                  <p class="cut-note" data-cut-message>Agrega medidas para calcular.</p>
+                </div>
+              </div>
+              <div class="cut-card cut-total-list" aria-live="polite">
+                <div class="cut-total-row"><span>Subtotal de materiales</span><strong data-cut-total="materials">$0.00</strong></div>
+                <div class="cut-total-row"><span>Subtotal de tapacanto</span><strong data-cut-total="edge">$0.00</strong></div>
+                <div class="cut-total-row"><span>Mano de obra</span><strong data-cut-total="labor">$0.00</strong></div>
+                <div class="cut-total-row cut-grand-total"><span>Total final</span><strong data-cut-total="final">$0.00</strong></div>
+              </div>
+            </div>
+            <div class="cut-actions"><button class="btn btn-primary" type="button" data-cut-print>Imprimir lista y cálculo</button><button class="btn" type="button" data-page="material-prices">Editar materiales y precios</button></div>
+          </section>`;
+      }
       function pdfSafeText(value) {
         return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
           .replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim();
@@ -1148,12 +1719,216 @@
             </div>
           </section>`;
       }
+      function settingsPage() {
+        return `${heading("Preferencias", "Configuración", "Administra los usuarios y respaldos de esta aplicación.") }
+          <section class="card">
+            <div class="card-head"><div><h2 class="card-title">Respaldo de datos</h2><div class="card-hint">Descarga una copia o restaura los datos desde un archivo guardado anteriormente.</div></div></div>
+            <div class="toolbar-left">
+              <button class="btn btn-primary" type="button" data-export-backup>Descargar respaldo</button>
+              <button class="btn" type="button" data-import-backup>Restaurar respaldo</button>
+            </div>
+          </section>
+          ${usersSection()}`;
+      }
+      function usersSection() {
+        const users = authUsers.map((user) => {
+          const current = user.id === currentAuthUserId;
+          return `<div class="user-row">
+            <div class="user-row-name">${safe(user.username)}${current ? `<div class="user-current">Sesión actual</div>` : ""}</div>
+            <form class="user-password-form" data-user-password="${safe(user.id)}">
+              <label>Nueva contraseña<input class="field" name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+              <label>Repetir contraseña<input class="field" name="passwordConfirm" type="password" minlength="8" autocomplete="new-password" required></label>
+              <button class="btn" type="submit">Actualizar contraseña</button>
+            </form>
+            <button class="btn btn-danger" type="button" data-user-remove="${safe(user.id)}"${current || authUsers.length <= 1 ? " disabled" : ""}>Eliminar</button>
+          </div>`;
+        }).join("");
+        const currentUser = authUsers.find((user) => user.id === currentAuthUserId);
+        return `<div class="cut-card users-section">
+          <div class="card-head"><div><h2 class="card-title">Usuarios</h2><div class="card-hint">Crea cuentas y actualiza sus contraseñas para este dispositivo.</div></div></div>
+          <div class="users-list">${users}</div>
+          <form class="user-create-form" data-user-create>
+            <label>Nombre de usuario<input class="field" name="username" type="text" minlength="3" maxlength="40" autocomplete="off" required></label>
+            <label>Contraseña<input class="field" name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+            <label>Repetir contraseña<input class="field" name="passwordConfirm" type="password" minlength="8" autocomplete="new-password" required></label>
+            <button class="btn btn-primary" type="submit">＋ Agregar usuario</button>
+          </form>
+          <p class="price-type-note">Las contraseñas se guardan como resúmenes PBKDF2 en este navegador, no dentro del respaldo de obras. Este inicio de sesión local no sustituye la seguridad de un servidor.</p>
+          <div><button class="btn" type="button" data-logout>Cerrar sesión${currentUser ? ` · ${safe(currentUser.username)}` : ""}</button></div>
+        </div>`;
+      }
       function render() {
         renderNav();
         document.getElementById("breadcrumb").textContent = navItems.find(([id]) => id === currentPage)?.[1] || "Panel";
-        document.getElementById("today").textContent = new Intl.DateTimeFormat("es-EC", { dateStyle: "full" }).format(new Date());
-        const pages = { dashboard, projects: projectsPage, clients: clientsPage, calendar: calendarPage, budgets: budgetsPage, "client-budget": clientBudgetPage, payments: paymentsPage, finance: financePage, notes: notesPage, stats: statsPage, inventory: inventoryPage, "materials-list": materialsListPage };
+        const pages = { dashboard, projects: projectsPage, clients: clientsPage, calendar: calendarPage, budgets: budgetsPage, "client-budget": clientBudgetPage, payments: paymentsPage, finance: financePage, notes: notesPage, stats: statsPage, inventory: inventoryPage, "materials-list": materialsListPage, "cut-calculator": cutCalculatorPage, "material-prices": materialPricesPage, settings: settingsPage };
         content.innerHTML = pages[currentPage]();
+        if (currentPage === "cut-calculator") updateCutCalculator();
+        if (currentPage === "material-prices") updatePriceRows();
+      }
+      function updateCutCalculator() {
+        const sheet = content.querySelector(".cut-calculator");
+        if (!sheet) return;
+        const laborMode = sheet.querySelector('[data-cut-field="labor-mode"]').value;
+        const laborLevel = sheet.querySelector('[data-cut-field="labor-level"]').value;
+        const laborRates = state.documents.laborRates;
+        sheet.querySelector("[data-cut-labor-percentage]").hidden = laborMode !== "percentage";
+        sheet.querySelector("[data-cut-labor-fixed]").hidden = laborMode !== "fixed";
+        const money = new Intl.NumberFormat("es-EC", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const amountFormat = new Intl.NumberFormat("es-EC", { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+        const readNumber = (input) => {
+          const value = input.value.trim();
+          if (!value) return null;
+          const number = Number(value);
+          return Number.isFinite(number) && number >= 0 ? number : null;
+        };
+        const catalog = state.documents.materialCatalog;
+        const materialsById = new Map(catalog.map((material) => [material.id, material]));
+        const totalsByMaterial = new Map();
+        const edgeTotals = new Map();
+        let materialsCost = 0;
+        let edgeCost = 0;
+        let validLines = 0;
+        let incompleteLines = 0;
+        sheet.querySelectorAll("#cut-list-rows tr").forEach((row) => {
+          updateCutRow(row);
+          const materialId = row.querySelector('[data-cut-field="material"]').value;
+          const material = materialsById.get(materialId);
+          const dimensions = row.querySelectorAll("[data-cut-dimension]");
+          const nameInput = row.querySelector('[data-cut-field="name"]');
+          const widthInput = row.querySelector('[data-cut-field="width"]');
+          const lengthInput = row.querySelector('[data-cut-field="length"]');
+          const quantityInput = row.querySelector('[data-cut-field="quantity"]');
+          const width = readNumber(widthInput);
+          const length = readNumber(lengthInput);
+          const quantity = readNumber(quantityInput);
+          const selectedEdges = material?.type === "sheet" ? [...row.querySelectorAll("[data-cut-edge]:checked")] : [];
+          const edgeMaterial = materialsById.get(row.querySelector('[data-cut-field="edge-material"]').value);
+          const isBlank = !materialId && !nameInput.value.trim() && !widthInput.value.trim()
+            && !lengthInput.value.trim() && !quantityInput.value.trim() && selectedEdges.length === 0;
+          const output = row.querySelector("[data-cut-row-cost]");
+          if (isBlank) { output.textContent = "—"; output.classList.remove("cut-invalid"); return; }
+          const selectedQtyValid = quantity !== null && quantity > 0
+            && (material?.type === "linear" || Number.isInteger(quantity));
+          const dimensionsValid = material?.type !== "sheet" || width !== null && width > 0 && length !== null && length > 0;
+          const boardWidth = Number(material?.width);
+          const boardLength = Number(material?.length);
+          const price = material?.price === "" ? null : Number(material?.price);
+          const priceValid = price !== null && Number.isFinite(price) && price >= 0
+            && (material?.type !== "sheet" || Number.isFinite(boardWidth) && boardWidth > 0 && Number.isFinite(boardLength) && boardLength > 0);
+          const isValid = Boolean(material) && ["sheet", "linear", "unit"].includes(material.type)
+            && Boolean(material.name.trim())
+            && selectedQtyValid && dimensionsValid && priceValid
+            && (material.type !== "sheet" || (width <= boardWidth && length <= boardLength)
+              || (width <= boardLength && length <= boardWidth))
+            && (!selectedEdges.length || edgeMaterial?.type === "linear"
+              && edgeMaterial.price !== "" && Number.isFinite(Number(edgeMaterial.price)) && Number(edgeMaterial.price) >= 0);
+          if (!isValid) {
+            output.textContent = "Revisar datos";
+            output.classList.add("cut-invalid");
+            dimensions.forEach((cell) => { cell.hidden = material?.type !== "sheet"; });
+            incompleteLines++;
+            return;
+          }
+          output.classList.remove("cut-invalid");
+          dimensions.forEach((cell) => { cell.hidden = material.type !== "sheet"; });
+          const area = material.type === "sheet" ? width * length / 10000 * quantity : 0;
+          const baseQuantity = material.type === "sheet" ? area : quantity;
+          const boardArea = material.type === "sheet" ? boardWidth * boardLength / 10000 : 1;
+          const baseCost = baseQuantity * price / boardArea;
+          const edgeLength = material.type === "sheet"
+            ? selectedEdges.reduce((sum, input) => sum + (input.dataset.cutEdge.startsWith("length") ? length : width), 0) / 100 * quantity
+            : 0;
+          const lineEdgeCost = edgeLength * (selectedEdges.length ? Number(edgeMaterial.price) : 0);
+          const lineCost = baseCost + lineEdgeCost;
+          output.textContent = money.format(lineCost);
+          materialsCost += baseCost;
+          edgeCost += lineEdgeCost;
+          const summary = totalsByMaterial.get(material.id) || { quantity: 0, area: 0, cost: 0 };
+          summary.quantity += quantity;
+          summary.area += area;
+          summary.cost += baseCost;
+          totalsByMaterial.set(material.id, summary);
+          if (edgeLength > 0 && edgeMaterial) {
+            const edgeSummary = edgeTotals.get(edgeMaterial.id) || { length: 0, cost: 0 };
+            edgeSummary.length += edgeLength;
+            edgeSummary.cost += lineEdgeCost;
+            edgeTotals.set(edgeMaterial.id, edgeSummary);
+          }
+          validLines++;
+        });
+        const summaryLines = [...totalsByMaterial].map(([id, summary]) => {
+          const material = materialsById.get(id);
+          const amount = material.type === "sheet"
+            ? `${amountFormat.format(summary.area)} m² · ${amountFormat.format(summary.quantity)} piezas`
+            : `${amountFormat.format(summary.quantity)} ${material.type === "linear" ? "m" : "unidades"}`;
+          return `<div class="cut-total-row"><span>${safe(material.name)} · ${amount}</span><strong>${money.format(summary.cost)}</strong></div>`;
+        });
+        for (const [id, summary] of edgeTotals) {
+          const material = materialsById.get(id);
+          summaryLines.push(`<div class="cut-total-row"><span>${safe(material.name)} · ${amountFormat.format(summary.length)} m</span><strong>${money.format(summary.cost)}</strong></div>`);
+        }
+        sheet.querySelector("[data-cut-material-summary]").innerHTML = summaryLines.length
+          ? summaryLines.join("")
+          : `<p class="cut-note">Agrega cortes o materiales para ver las cantidades.</p>`;
+        let laborCost = 0;
+        let laborValid = true;
+        if (laborMode === "fixed") {
+          const amount = readNumber(sheet.querySelector('[data-cut-field="labor-amount"]'));
+          laborValid = amount !== null;
+          if (laborValid) laborCost = amount;
+        } else {
+          const rateValue = String(laborRates[laborLevel] ?? "").trim();
+          const rate = Number(rateValue);
+          laborValid = ["easy", "medium", "difficult"].includes(laborLevel)
+            && rateValue !== "" && Number.isFinite(rate) && rate >= 0 && rate <= 100;
+          if (laborValid) laborCost = (materialsCost + edgeCost) * rate / 100;
+        }
+        const totals = incompleteLines
+          ? { materials: "Revisar datos", edge: "Revisar datos", labor: "Revisar datos", final: "Revisar datos" }
+          : !laborValid
+            ? {
+              materials: money.format(materialsCost),
+              edge: money.format(edgeCost),
+              labor: laborMode === "fixed" ? "Completar monto" : "Revisar porcentaje",
+              final: "Completar mano de obra"
+            }
+          : {
+            materials: money.format(materialsCost),
+            edge: money.format(edgeCost),
+            labor: money.format(laborCost),
+            final: money.format(materialsCost + edgeCost + laborCost)
+          };
+        Object.entries(totals).forEach(([key, value]) => {
+          sheet.querySelector(`[data-cut-total="${key}"]`).textContent = value;
+        });
+        const message = sheet.querySelector("[data-cut-message]");
+        message.textContent = incompleteLines
+          ? `Revisa ${incompleteLines === 1 ? "la línea marcada" : `las ${incompleteLines} líneas marcadas`}; completa la cantidad, las medidas y el precio del catálogo.`
+          : validLines ? `${validLines} ${validLines === 1 ? "renglón incluido" : "renglones incluidos"} en el cálculo.` : "Agrega medidas o cantidades para calcular.";
+        message.classList.toggle("cut-invalid", incompleteLines > 0);
+      }
+      function updateCutRow(row) {
+        const material = state.documents.materialCatalog.find((item) => item.id === row.querySelector('[data-cut-field="material"]').value);
+        const isSheet = material?.type === "sheet";
+        row.querySelectorAll("[data-cut-dimension]").forEach((cell) => { cell.hidden = !isSheet; });
+        row.querySelector(".cut-edges").hidden = !isSheet;
+        const quantity = row.querySelector('[data-cut-field="quantity"]');
+        quantity.step = material?.type === "linear" ? "any" : "1";
+        quantity.placeholder = material?.type === "sheet" ? "Piezas" : material?.type === "linear" ? "Metros" : "Unidades";
+        const edgeSelect = row.querySelector('[data-cut-field="edge-material"]');
+        const edgeMaterials = state.documents.materialCatalog.filter((item) => item.type === "linear");
+        const currentEdge = edgeSelect.value;
+        edgeSelect.innerHTML = edgeMaterials.map((item) => `<option value="${safe(item.id)}"${item.id === currentEdge ? " selected" : ""}>${safe(item.name)}</option>`).join("");
+      }
+      function updatePriceRows() {
+        const sheet = content.querySelector(".price-list");
+        if (!sheet) return;
+        sheet.querySelectorAll("[data-material-row]").forEach((row) => {
+          const isSheet = row.querySelector('[data-material-field="type"]').value === "sheet";
+          row.querySelectorAll("[data-material-field=\"width\"], [data-material-field=\"length\"]").forEach((input) => {
+            input.closest("td").hidden = !isSheet;
+          });
+        });
       }
       function openMaterial(material) {
         materialForm.reset();
@@ -1228,12 +2003,119 @@
       }
       navigation.addEventListener("click", (event) => {
         const button = event.target.closest("[data-page]");
-        if (button) setPage(button.dataset.page);
+        if (button) {
+          setPage(button.dataset.page);
+          closeMobileSidebar();
+        }
+      });
+      content.addEventListener("submit", async (event) => {
+        const form = event.target.closest("[data-user-create], [data-user-password]");
+        if (!form) return;
+        event.preventDefault();
+        const data = new FormData(form);
+        const password = String(data.get("password") || "");
+        if (password.length < 8) { notify("La contraseña debe tener al menos 8 caracteres."); return; }
+        if (password !== data.get("passwordConfirm")) { notify("Las contraseñas no coinciden."); return; }
+        try {
+          if (form.matches("[data-user-create]")) {
+            const username = String(data.get("username") || "").trim();
+            if (username.length < 3 || username.length > 40 || !/^[\p{L}\p{N}._-]+$/u.test(username)) {
+              notify("El usuario debe tener entre 3 y 40 caracteres: letras, números, punto, guion o guion bajo.");
+              return;
+            }
+            if (authUsers.some((user) => user.username.toLocaleLowerCase("es") === username.toLocaleLowerCase("es"))) {
+              notify("Ya existe un usuario con ese nombre.");
+              return;
+            }
+            const credentials = await hashPassword(password);
+            const previousUsers = authUsers;
+            authUsers = [...authUsers, { id: crypto.randomUUID(), username, ...credentials }];
+            if (!saveAuthUsers()) { authUsers = previousUsers; render(); return; }
+            render();
+            notify("Usuario agregado.");
+            return;
+          }
+          const user = authUsers.find((item) => item.id === form.dataset.userPassword);
+          if (!user) { notify("No se encontró el usuario que deseas actualizar."); return; }
+          const credentials = await hashPassword(password);
+          const previousUser = { ...user };
+          Object.assign(user, credentials);
+          if (!saveAuthUsers()) { Object.assign(user, previousUser); render(); return; }
+          render();
+          notify("Contraseña actualizada.");
+        } catch (error) {
+          console.error("No se pudo guardar el usuario:", error);
+          notify("No se pudo guardar el usuario. Revisa la compatibilidad del navegador e inténtalo otra vez.");
+        }
       });
       content.addEventListener("click", (event) => {
         const target = event.target.closest("button");
         if (!target) return;
+        if (target.hasAttribute("data-logout")) {
+          lockApplication();
+          return;
+        }
+        if (target.hasAttribute("data-user-remove")) {
+          const user = authUsers.find((item) => item.id === target.dataset.userRemove);
+          if (!user || user.id === currentAuthUserId || authUsers.length <= 1) {
+            notify("No puedes eliminar tu propia cuenta ni la última cuenta.");
+            return;
+          }
+          if (!window.confirm(`¿Eliminar el usuario “${user.username}”?`)) return;
+          const previousUsers = authUsers;
+          authUsers = authUsers.filter((item) => item.id !== user.id);
+          if (!saveAuthUsers()) { authUsers = previousUsers; render(); return; }
+          render();
+          notify("Usuario eliminado.");
+          return;
+        }
+        if (target.hasAttribute("data-export-backup")) {
+          saveDocumentDraft();
+          downloadBackup();
+          return;
+        }
+        if (target.hasAttribute("data-import-backup")) {
+          backupFile.click();
+          return;
+        }
         if (target.dataset.page) { setPage(target.dataset.page); return; }
+        if (target.hasAttribute("data-material-add")) {
+          const material = { id: crypto.randomUUID(), name: "", type: "unit", width: "", length: "", price: "" };
+          document.getElementById("material-price-rows").insertAdjacentHTML("beforeend", materialPriceRow(material));
+          updatePriceRows();
+          saveDocumentDraft("material-prices");
+          content.querySelector(`[data-material-row="${material.id}"] [data-material-field="name"]`).focus();
+          return;
+        }
+        if (target.hasAttribute("data-material-remove")) {
+          const row = target.closest("[data-material-row]");
+          const material = state.documents.materialCatalog.find((item) => item.id === row.dataset.materialRow);
+          const legacyId = material?.id === "melamina-12" ? "12" : material?.id === "melamina-18" ? "18" : "";
+          const used = state.documents.cutList?.rows?.some((item) =>
+            item.material === material?.id || item.material === legacyId || item.edgeMaterial === material?.id
+          );
+          if (used && !window.confirm(`“${material.name || "Este material"}” se usa en la lista de cortes. ¿Eliminarlo igualmente?`)) return;
+          row.remove();
+          saveDocumentDraft("material-prices");
+          return;
+        }
+        if (target.hasAttribute("data-cut-add")) {
+          document.getElementById("cut-list-rows").insertAdjacentHTML("beforeend", cutListRow());
+          updateCutCalculator();
+          saveDocumentDraft("cut-calculator");
+          return;
+        }
+        if (target.hasAttribute("data-cut-remove")) {
+          target.closest("tr").remove();
+          updateCutCalculator();
+          saveDocumentDraft("cut-calculator");
+          return;
+        }
+        if (target.hasAttribute("data-cut-print")) {
+          saveDocumentDraft("cut-calculator");
+          window.print();
+          return;
+        }
         if (target.hasAttribute("data-add-material-row")) {
           document.getElementById("materials-list-rows")?.insertAdjacentHTML("beforeend", materialsListRow());
           saveDocumentDraft("materials-list");
@@ -1346,19 +2228,28 @@
         if (event.target.id === "client-search") filterClients();
         if (event.target.closest(".client-budget-sheet")) saveDocumentDraft("client-budget");
         if (event.target.closest(".materials-list-sheet")) saveDocumentDraft("materials-list");
+        if (event.target.closest(".cut-calculator")) {
+          updateCutCalculator();
+          saveDocumentDraft("cut-calculator");
+        }
+        if (event.target.closest(".price-list")) saveDocumentDraft("material-prices");
       });
       content.addEventListener("change", (event) => {
         if (event.target.id === "project-filter") filterProjects();
         if (event.target.closest(".client-budget-sheet")) saveDocumentDraft("client-budget");
         if (event.target.closest(".materials-list-sheet")) saveDocumentDraft("materials-list");
-      });
-      document.getElementById("new-project").addEventListener("click", () => openProject());
-      document.getElementById("export-backup").addEventListener("click", () => {
-        saveDocumentDraft();
-        downloadBackup();
+        if (event.target.closest(".cut-calculator")) {
+          const row = event.target.closest("#cut-list-rows tr");
+          if (row) updateCutRow(row);
+          updateCutCalculator();
+          saveDocumentDraft("cut-calculator");
+        }
+        if (event.target.closest(".price-list")) {
+          updatePriceRows();
+          saveDocumentDraft("material-prices");
+        }
       });
       const backupFile = document.getElementById("backup-file");
-      document.getElementById("import-backup").addEventListener("click", () => backupFile.click());
       backupFile.addEventListener("change", async () => {
         const file = backupFile.files[0];
         if (!file) return;
@@ -1509,6 +2400,7 @@
       });
       persist();
       render();
+      await initializeAuthentication();
       if (databaseError) notify("La base de datos local no está disponible. Los cambios se guardarán en este navegador; descarga respaldos periódicos.");
       if (database && navigator.storage?.persist) {
         navigator.storage.persist().then((granted) => {

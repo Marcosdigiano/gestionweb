@@ -1,0 +1,181 @@
+{
+  "format": "bamino-construcciones-backup",
+  "version": 1,
+  "exportedAt": "2026-11-08T01:16:07.344Z",
+  "data": {
+    "projects": [
+      {
+        "id": "ecd98c9c-58c0-437c-b907-515d0786d6da",
+        "name": "Remodelación de vivienda",
+        "location": "Cuenca",
+        "date": "2026-11-09",
+        "status": "En ejecución",
+        "budget": 12800,
+        "paid": 6400,
+        "notes": "Acabados interiores y renovación de cocina.",
+        "clientId": "2cf4ccd0-4450-4976-8509-848f44ac10bf"
+      },
+      {
+        "id": "50314996-0d04-42cb-8459-be466c539747",
+        "name": "Ampliación de local comercial",
+        "location": "Centro",
+        "date": "2026-11-13",
+        "status": "Planificada",
+        "budget": 18600,
+        "paid": 5000,
+        "notes": "Preparar cronograma de obra y materiales.",
+        "clientId": "ea63e389-6d47-4ac5-86f8-bca2aa08674d"
+      },
+      {
+        "id": "cca5de7b-3793-4014-9b8b-9c5850316040",
+        "name": "Diseño y obra de terraza",
+        "location": "Totoracocha",
+        "date": "2026-11-18",
+        "status": "En ejecución",
+        "budget": 7400,
+        "paid": 4200,
+        "notes": "Impermeabilización y estructura liviana.",
+        "clientId": "2cf4ccd0-4450-4976-8509-848f44ac10bf"
+      },
+      {
+        "id": "6c7532d8-d0e0-4dc4-a8e3-09d819ac351a",
+        "name": "Adecuación de oficinas",
+        "location": "Cuenca",
+        "date": "2026-11-25",
+        "status": "Pausada",
+        "budget": 9200,
+        "paid": 2500,
+        "notes": "Pendiente aprobación de acabados.",
+        "clientId": "6008d1b6-39b5-4301-82df-b7afc20848d4"
+      }
+    ],
+    "notes": [
+      {
+        "id": "7ccff6c5-8b15-41cc-8b02-b337487b5dda",
+        "title": "Revisar cronograma semanal",
+        "body": "Confirmar avances y coordinar las entregas de materiales con cada frente de trabajo.",
+        "createdAt": "2026-11-07T23:39:36.433Z"
+      },
+      {
+        "id": "bdf8bf42-a411-4a74-9abb-9beb648dc08a",
+        "title": "Seguimiento de presupuestos",
+        "body": "Dar seguimiento a propuestas pendientes y actualizar los próximos pasos.",
+        "createdAt": "2026-11-07T23:39:36.433Z"
+      }
+    ],
+    "goals": {
+      "works": {
+        "value": 3,
+        "target": 5,
+        "label": "Obras en ejecución"
+      },
+      "collections": {
+        "value": 2,
+        "target": 4,
+        "label": "Cobros completados"
+      }
+    },
+    "inventory": [],
+    "documents": {
+      "clientBudget": null,
+      "materialsList": null,
+      "woodCalculator": null,
+      "cutList": {
+        "client": "",
+        "project": "",
+        "laborMode": "fixed",
+        "laborLevel": "easy",
+        "laborAmount": "",
+        "rows": [
+          {
+            "name": "",
+            "material": "",
+            "width": "",
+            "length": "",
+            "quantity": "",
+            "edgeMaterial": "tapacanto",
+            "edges": []
+          }
+        ]
+      },
+      "materialCatalog": [
+        {
+          "id": "melamina-12",
+          "name": "Melamina 12 mm",
+          "type": "sheet",
+          "width": "183",
+          "length": "275",
+          "price": ""
+        },
+        {
+          "id": "melamina-18",
+          "name": "Melamina 18 mm",
+          "type": "sheet",
+          "width": "183",
+          "length": "275",
+          "price": ""
+        },
+        {
+          "id": "tapacanto",
+          "name": "Tapacanto",
+          "type": "linear",
+          "width": "",
+          "length": "",
+          "price": ""
+        },
+        {
+          "id": "tornillos",
+          "name": "Tornillos",
+          "type": "unit",
+          "width": "",
+          "length": "",
+          "price": ""
+        },
+        {
+          "id": "tarugos",
+          "name": "Tarugos",
+          "type": "unit",
+          "width": "",
+          "length": "",
+          "price": ""
+        },
+        {
+          "id": "soportes",
+          "name": "Soportes",
+          "type": "unit",
+          "width": "",
+          "length": "",
+          "price": ""
+        }
+      ],
+      "laborRates": {
+        "easy": "15",
+        "medium": "30",
+        "difficult": "40"
+      }
+    },
+    "clients": [
+      {
+        "id": "2cf4ccd0-4450-4976-8509-848f44ac10bf",
+        "number": "1",
+        "name": "Proyecto residencial",
+        "phone": "",
+        "email": ""
+      },
+      {
+        "id": "ea63e389-6d47-4ac5-86f8-bca2aa08674d",
+        "number": "2",
+        "name": "Proyecto comercial",
+        "phone": "",
+        "email": ""
+      },
+      {
+        "id": "6008d1b6-39b5-4301-82df-b7afc20848d4",
+        "number": "3",
+        "name": "Proyecto corporativo",
+        "phone": "",
+        "email": ""
+      }
+    ]
+  }
+}
