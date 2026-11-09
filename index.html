@@ -146,6 +146,11 @@
     .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(240px, .85fr); gap: 17px; align-items: start; }
     .stack { display: grid; gap: 17px; }
     .card { padding: 19px; }
+    .inventory-alert-card { margin-bottom: 17px; }
+    .inventory-alert-list { display: grid; }
+    .inventory-alert-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #f0f1ee; }
+    .inventory-alert-row:first-child { padding-top: 0; border-top: 0; }
+    .inventory-alert-row > strong { color: var(--red); font-size: 11px; white-space: nowrap; }
     .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
     .card-title { margin: 0; font-size: 13px; font-weight: 700; }
     .card-hint { margin-top: 5px; color: var(--muted); font-size: 11px; }
@@ -546,8 +551,10 @@
     <form class="dialog-form" id="material-form">
       <input type="hidden" name="id">
       <div class="form-field full"><label for="material-name">Nombre del material *</label><input class="field" id="material-name" name="name" required maxlength="90" placeholder="Ej. Cemento, pintura, arena"></div>
+      <div class="form-field full"><label for="material-location">Lugar</label><input class="field" id="material-location" name="location" maxlength="120" placeholder="Ej. Bodega, estante 2"></div>
       <div class="form-field"><label for="material-unit">Unidad *</label><select class="select" id="material-unit" name="unit" required><option value="kg">Kilogramos (kg)</option><option value="L">Litros (L)</option><option value="unidades">Unidades</option></select></div>
       <div class="form-field"><label for="material-initial-stock">Stock inicial</label><input class="field" id="material-initial-stock" name="initialStock" type="number" min="0" step="0.01" value="0" required></div>
+      <div class="form-field full"><label for="material-minimum-stock">Stock mínimo</label><input class="field" id="material-minimum-stock" name="minimumStock" type="number" min="0" step="0.01" placeholder="Ej. 5"><span class="card-hint">Recibirás una alerta en el Panel cuando el stock llegue a este nivel. Déjalo vacío si no quieres alertas.</span></div>
       <div class="form-field full"><label for="material-unit-price">Precio unitario (USD) *</label><input class="field" id="material-unit-price" name="unitPrice" type="number" min="0" step="0.01" value="0" required></div>
       <p class="card-hint full" id="material-form-hint">El stock inicial se guardará como una entrada. Luego podrás registrar entradas y salidas.</p>
       <div class="dialog-actions"><button class="btn" type="button" data-close>Cancelar</button><button class="btn btn-primary" type="submit">Guardar material</button></div>
@@ -741,6 +748,7 @@
       });
       state.inventory.forEach((material) => {
         if (!Number.isFinite(Number(material.unitPrice))) material.unitPrice = 0;
+        if (material.minimumStock === "" || (material.minimumStock !== null && (!Number.isFinite(Number(material.minimumStock)) || Number(material.minimumStock) < 0))) material.minimumStock = null;
       });
       let currentPage = "dashboard";
       let calendarDate = new Date();
@@ -1222,6 +1230,10 @@
         const upcoming = [...activeProjects()].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
         const due = total("budget") - total("paid");
         const running = state.projects.filter((project) => project.status === "En ejecución").length;
+        const quantityFormat = new Intl.NumberFormat("es-EC", { maximumFractionDigits: 2 });
+        const configuredStockLimits = state.inventory.filter((material) => material.minimumStock !== null && material.minimumStock !== undefined && Number.isFinite(Number(material.minimumStock)));
+        const lowStockMaterials = configuredStockLimits.filter((material) => Number(material.stock) <= Number(material.minimumStock));
+        const inventoryAlerts = `<section class="card inventory-alert-card"><div class="card-head"><div><h2 class="card-title">Alertas de inventario</h2><div class="card-hint">${lowStockMaterials.length ? `${lowStockMaterials.length} materiales están en o por debajo de su stock mínimo` : "Avisos según los mínimos definidos en Inventario"}</div></div><button class="btn btn-quiet" type="button" data-page="inventory">Ver inventario →</button></div>${lowStockMaterials.length ? `<div class="inventory-alert-list">${lowStockMaterials.map((material) => `<div class="inventory-alert-row"><div><div class="table-main">${safe(material.name)}</div><div class="table-sub">${safe(material.location || "Lugar no indicado")}</div></div><strong>${quantityFormat.format(Number(material.stock) || 0)} / ${quantityFormat.format(Number(material.minimumStock))} ${safe(material.unit)}</strong></div>`).join("")}</div>` : `<div class="empty-state">${configuredStockLimits.length ? "No hay materiales por debajo de su mínimo." : "Configura un stock mínimo en un material para activar las alertas."}</div>`}</section>`;
         return `${heading("Gestión de obras", "Controla cada avance.", "Un vistazo claro a las obras, los presupuestos y los cobros de tu equipo.")}
           <section class="metrics" aria-label="Resumen">
             ${metric("Obras activas", running, `${state.projects.length} obras registradas`, "▤")}
@@ -1229,6 +1241,7 @@
             ${metric("Por cobrar", fmtMoney(due), "saldo pendiente de clientes", "$")}
             ${metric("Cobrado", fmtMoney(total("paid")), "pagos registrados", "✓")}
           </section>
+          ${inventoryAlerts}
           <div class="dashboard-grid">
             <section class="card"><div class="card-head"><div><h2 class="card-title">Próximas obras</h2><div class="card-hint">Fechas de inicio y estado de cada proyecto</div></div><button class="btn btn-quiet" type="button" data-page="projects">Ver todas →</button></div>${projectRows(upcoming)}</section>
             <div class="stack">
@@ -1393,10 +1406,10 @@
             return `<div class="finance-box"><span>Stock total (${unit})</span><strong>${qtyFormat.format(quantity)}</strong></div>`;
           }).join("")}</section>
           <section class="card"><div class="card-head"><div><h2 class="card-title">Materiales disponibles</h2><div class="card-hint">${materials.length} materiales registrados</div></div></div>
-          ${materials.length ? `<div class="table-wrap"><table><thead><tr><th>MATERIAL</th><th>UNIDAD</th><th>STOCK DISPONIBLE</th><th>PRECIO UNITARIO</th><th>VALOR TOTAL</th><th>ACCIONES</th></tr></thead><tbody>${materials.map((material) => {
+          ${materials.length ? `<div class="table-wrap"><table><thead><tr><th>MATERIAL</th><th>LUGAR</th><th>UNIDAD</th><th>STOCK DISPONIBLE</th><th>STOCK MÍNIMO</th><th>PRECIO UNITARIO</th><th>VALOR TOTAL</th><th>ACCIONES</th></tr></thead><tbody>${materials.map((material) => {
             const stock = Number(material.stock) || 0;
             const unitPrice = Number(material.unitPrice) || 0;
-            return `<tr><td class="table-main">${safe(material.name)}</td><td>${safe(material.unit)}</td><td class="amount">${qtyFormat.format(stock)} ${safe(material.unit)}</td><td class="amount">${unitPriceFormat.format(unitPrice)}</td><td class="amount">${unitPriceFormat.format(stock * unitPrice)}</td><td><div class="stock-actions"><button class="text-link stock-entry" type="button" data-stock-move="${material.id}" data-movement-type="entrada">＋ Entrada</button><button class="text-link stock-exit" type="button" data-stock-move="${material.id}" data-movement-type="salida">− Salida</button><button class="text-link" type="button" data-edit-material="${material.id}">Editar</button><button class="text-link btn-danger" type="button" data-delete-material="${material.id}">Eliminar</button></div></td></tr>`;
+            return `<tr><td class="table-main">${safe(material.name)}</td><td>${safe(material.location || "—")}</td><td>${safe(material.unit)}</td><td class="amount">${qtyFormat.format(stock)} ${safe(material.unit)}</td><td class="amount">${material.minimumStock === null || material.minimumStock === undefined ? "—" : `${qtyFormat.format(Number(material.minimumStock))} ${safe(material.unit)}`}</td><td class="amount">${unitPriceFormat.format(unitPrice)}</td><td class="amount">${unitPriceFormat.format(stock * unitPrice)}</td><td><div class="stock-actions"><button class="text-link stock-entry" type="button" data-stock-move="${material.id}" data-movement-type="entrada">＋ Entrada</button><button class="text-link stock-exit" type="button" data-stock-move="${material.id}" data-movement-type="salida">− Salida</button><button class="text-link" type="button" data-edit-material="${material.id}">Editar</button><button class="text-link btn-danger" type="button" data-delete-material="${material.id}">Eliminar</button></div></td></tr>`;
           }).join("")}</tbody></table></div>` : `<div class="empty-state">Todavía no hay materiales. Agrega uno para comenzar a controlar el stock.</div>`}</section>
           <section class="card" style="margin-top:17px"><div class="card-head"><div><h2 class="card-title">Movimientos recientes</h2><div class="card-hint">Historial de entradas y salidas registradas</div></div></div>
           ${movements.length ? `<div class="table-wrap"><table><thead><tr><th>FECHA</th><th>MATERIAL</th><th>MOVIMIENTO</th><th>CANTIDAD</th><th>DETALLE</th></tr></thead><tbody>${movements.map(({ material, ...movement }) => `<tr><td>${fmtDate(movement.date, { day: "numeric", month: "short", year: "numeric" })}</td><td class="table-main">${safe(material.name)}</td><td>${movement.type === "entrada" ? "Entrada" : "Salida"}</td><td class="amount">${movement.type === "entrada" ? "+" : "−"}${qtyFormat.format(Number(movement.quantity) || 0)} ${safe(material.unit)}</td><td>${safe(movement.note || "—")}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty-state">Aquí aparecerá el historial cuando registres movimientos.</div>`}</section>`;
@@ -1934,6 +1947,8 @@
         materialForm.reset();
         materialForm.elements.id.value = material?.id || "";
         materialForm.elements.name.value = material?.name || "";
+        materialForm.elements.location.value = material?.location || "";
+        materialForm.elements.minimumStock.value = material?.minimumStock ?? "";
         materialForm.elements.unit.value = material?.unit || "kg";
         materialForm.elements.unitPrice.value = material?.unitPrice ?? 0;
         const isEditing = Boolean(material);
@@ -2267,9 +2282,16 @@
         event.preventDefault();
         const data = new FormData(materialForm);
         const name = String(data.get("name") || "").trim();
+        const location = String(data.get("location") || "").trim();
+        const minimumStockValue = String(data.get("minimumStock") || "").trim();
+        const minimumStock = minimumStockValue === "" ? null : Number(minimumStockValue);
         const id = String(data.get("id") || "");
         const existing = state.inventory.find((item) => item.id === id);
         if (!name) { notify("Escribe el nombre del material."); return; }
+        if (minimumStock !== null && (!Number.isFinite(minimumStock) || minimumStock < 0)) {
+          notify("El stock mínimo debe ser un valor válido igual o mayor que cero.");
+          return;
+        }
         const unitPrice = Number(data.get("unitPrice"));
         if (!Number.isFinite(unitPrice) || unitPrice < 0) {
           notify("El precio unitario debe ser un valor válido igual o mayor que cero.");
@@ -2277,6 +2299,8 @@
         }
         if (existing) {
           existing.name = name;
+          existing.location = location;
+          existing.minimumStock = minimumStock;
           existing.unitPrice = unitPrice;
           persist(); materialDialog.close(); render(); notify("Material actualizado.");
           return;
@@ -2287,7 +2311,7 @@
           notify("Revisa la unidad y el stock inicial del material.");
           return;
         }
-        const material = { id: crypto.randomUUID(), name, unit, stock: initialStock, unitPrice, movements: [] };
+        const material = { id: crypto.randomUUID(), name, location, minimumStock, unit, stock: initialStock, unitPrice, movements: [] };
         if (initialStock > 0) material.movements.push({ id: crypto.randomUUID(), type: "entrada", quantity: initialStock, date: day(0), note: "Stock inicial" });
         state.inventory.push(material);
         persist(); materialDialog.close(); render(); notify("Material agregado al inventario.");
