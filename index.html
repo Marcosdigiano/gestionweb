@@ -51,6 +51,8 @@
     .auth-card p { color: var(--muted); font-size: 12px; line-height: 1.5; }
     .auth-form { display: grid; gap: 13px; margin-top: 20px; }
     .auth-form label, .user-create-form label, .user-password-form label { display: grid; gap: 6px; color: #45413d; font-size: 11px; font-weight: 650; }
+    .auth-form .auth-remember { display: flex; align-items: center; gap: 8px; }
+    .auth-remember input { margin: 0; accent-color: var(--green); }
     .auth-error { min-height: 17px; margin: 0; color: var(--red) !important; }
     .users-section { display: grid; gap: 14px; margin-top: 18px; }
     .users-list { display: grid; gap: 10px; }
@@ -318,6 +320,34 @@
     .cut-grand-total strong { color: var(--green-dark); font-size: 21px; }
     .cut-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .cut-invalid { color: var(--red) !important; }
+    .cut-optimizer { display: grid; gap: 15px; }
+    .optimizer-settings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .optimizer-settings label, .optimizer-pieces label { display: grid; gap: 6px; color: #45413d; font-size: 11px; font-weight: 650; }
+    .optimizer-settings input, .optimizer-pieces input { width: 100%; min-width: 75px; }
+    .optimizer-table-wrap { overflow-x: auto; }
+    .optimizer-pieces { width: 100%; min-width: 690px; border-collapse: collapse; }
+    .optimizer-pieces th, .optimizer-pieces td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+    .optimizer-pieces th { color: var(--muted); font-size: 10px; }
+    .optimizer-pieces input { min-height: 36px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #fff; font: inherit; font-size: 12px; }
+    .optimizer-pieces .optimizer-quantity { min-width: 75px; }
+    .optimizer-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .optimizer-results { display: grid; gap: 14px; }
+    .optimizer-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .optimizer-stat { padding: 13px; border: 1px solid var(--line); border-radius: 9px; background: #faf9f7; }
+    .optimizer-stat span { display: block; color: var(--muted); font-size: 10px; }
+    .optimizer-stat strong { display: block; margin-top: 5px; font-size: 18px; }
+    .optimizer-sheet-list { display: grid; gap: 14px; }
+    .optimizer-sheet-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .optimizer-sheet-head h3 { margin: 0; font-size: 14px; }
+    .optimizer-sheet-head span { color: var(--muted); font-size: 11px; }
+    .optimizer-board { display: block; width: 100%; max-height: 620px; border: 1px solid var(--line); border-radius: 8px; background: #fcfbf9; }
+    .optimizer-remnants { display: grid; gap: 7px; margin-top: 12px; }
+    .optimizer-remnant { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 1px dashed #c8c0b7; border-radius: 7px; color: #514a43; background: #f5f2ee; font-size: 11px; }
+    .optimizer-remnant.optimizer-waste { border-color: #e4d7d4; color: #8a625d; background: #faf3f1; }
+    .optimizer-remnant-empty { color: var(--muted); font-size: 11px; }
+    .optimizer-piece-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .optimizer-piece-tag { padding: 5px 8px; border-radius: 999px; color: #45413d; background: #f3efe9; font-size: 10px; }
+    .optimizer-empty { padding: 18px; border: 1px dashed var(--line); border-radius: 9px; color: var(--muted); background: #faf9f7; font-size: 12px; }
     .price-list { display: grid; gap: 15px; }
     .price-table-wrap { overflow-x: auto; }
     .price-table { min-width: 760px; }
@@ -337,6 +367,7 @@
       .materials-list-sheet { padding: 15px; }
       .materials-list-group, .materials-list-footer { grid-template-columns: 1fr; }
       .cut-fields, .cut-bottom { grid-template-columns: 1fr; }
+      .optimizer-settings, .optimizer-summary { grid-template-columns: 1fr; }
       .labor-rate-grid { grid-template-columns: 1fr; }
     }
     @media print {
@@ -373,6 +404,13 @@
       .cut-fields input, .cut-lines input, .cut-lines select { min-height: auto; padding: 2px; border-color: transparent; appearance: none; }
       .cut-lines th, .cut-lines td { padding: 5px 3px; border-top: 1px solid #ccc; color: #000; font-size: 9px; }
       .cut-note { color: #555; }
+      body:has(.cut-optimizer) * { visibility: hidden !important; }
+      body:has(.cut-optimizer) .cut-optimizer,
+      body:has(.cut-optimizer) .cut-optimizer * { visibility: visible !important; }
+      body:has(.cut-optimizer) .cut-optimizer { position: absolute; inset: 0 auto auto 0; width: 100%; }
+      .optimizer-inputs, .optimizer-toolbar, .optimizer-empty { display: none !important; }
+      .optimizer-board { max-height: none; }
+      .optimizer-sheet-card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
       body:has(.price-list) * { visibility: hidden !important; }
       body:has(.price-list) .price-list, body:has(.price-list) .price-list * { visibility: visible !important; }
       body:has(.price-list) .price-list { position: absolute; inset: 0 auto auto 0; width: 100%; }
@@ -581,6 +619,7 @@
       const STORAGE_TIME_KEY = `${STORAGE_KEY}-saved-at`;
       const AUTH_STORAGE_KEY = `${STORAGE_KEY}-users`;
       const AUTH_SESSION_KEY = `${STORAGE_KEY}-session`;
+      const REMEMBERED_USERNAME_KEY = `${STORAGE_KEY}-remembered-username`;
       const DATABASE_NAME = "bamino-construcciones-database";
       const DATABASE_STORE = "app-data";
       let database = null;
@@ -624,6 +663,7 @@
         ["materials-list", "Listado materiales", "▤"],
         ["cut-calculator", "Calculadora de costos", "⌁"],
         ["material-prices", "Materiales y precios", "$"],
+        ["cut-optimizer", "Optimizador de cortes", "▧"],
         ["settings", "Configuración", "⚙"]
       ];
       const day = (offset) => {
@@ -668,6 +708,13 @@
             length: String(material.length ?? ""),
             price: String(material.price ?? "")
           }));
+      }
+      function ensureCutOptimizerDraft(documents) {
+        if (!documents.cutOptimizer || typeof documents.cutOptimizer !== "object") documents.cutOptimizer = null;
+        const result = documents.cutOptimizer?.result;
+        if (result && (!Array.isArray(result.sheets) || !Number.isFinite(Number(result.trim)))) {
+          documents.cutOptimizer.result = null;
+        }
       }
       const initialState = () => ({
         projects: [
@@ -716,6 +763,7 @@
       if (!state.documents.clientBudget || typeof state.documents.clientBudget !== "object") state.documents.clientBudget = null;
       if (!state.documents.materialsList || typeof state.documents.materialsList !== "object") state.documents.materialsList = null;
       if (!state.documents.cutList || typeof state.documents.cutList !== "object") state.documents.cutList = null;
+      ensureCutOptimizerDraft(state.documents);
       ensureMaterialCatalog(state.documents);
       ensureLaborRates(state.documents);
       let needsClientMigration = !Array.isArray(state.clients);
@@ -756,6 +804,7 @@
       let authUsers = [];
       let currentAuthUserId = "";
       let authStorageError = null;
+      let rememberedUsername = "";
       try {
         const storedUsers = localStorage.getItem(AUTH_STORAGE_KEY);
         authUsers = storedUsers ? JSON.parse(storedUsers) : [];
@@ -768,6 +817,11 @@
         authUsers = [];
         authStorageError = error;
         console.error("No se pudo leer la lista local de usuarios:", error);
+      }
+      try {
+        rememberedUsername = localStorage.getItem(REMEMBERED_USERNAME_KEY) || "";
+      } catch (error) {
+        console.error("No se pudo leer el usuario recordado:", error);
       }
       const content = document.getElementById("content");
       const navigation = document.getElementById("navigation");
@@ -899,6 +953,22 @@
         const errorElement = authContent.querySelector("[data-auth-error]");
         if (errorElement) errorElement.textContent = message;
       }
+      function saveRememberedUsername(username, remember) {
+        try {
+          if (remember) {
+            localStorage.setItem(REMEMBERED_USERNAME_KEY, username);
+            rememberedUsername = username;
+          } else {
+            localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+            rememberedUsername = "";
+          }
+          return true;
+        } catch (error) {
+          console.error("No se pudo guardar la preferencia del usuario:", error);
+          notify("No se pudo recordar el usuario en este navegador.");
+          return false;
+        }
+      }
       function renderAuth(message = "") {
         const firstUser = authUsers.length === 0;
         authContent.innerHTML = `<div class="auth-brand"><img src="imge/logo.png" alt=""><strong>BAMINO CONSTRUCCIONES</strong></div>
@@ -906,10 +976,12 @@
           <p>${firstUser ? "Crea la primera cuenta para habilitar el acceso a la aplicación." : "Ingresa con tu usuario y contraseña para continuar."}</p>
           <p>Este acceso se guarda en este navegador y dispositivo; no reemplaza la autenticación de un servidor.</p>
           ${authStorageError ? `<p class="auth-error" role="alert">No se pudo acceder a los usuarios guardados. La aplicación permanecerá bloqueada. Revisa el almacenamiento del navegador.</p>` : ""}
-          ${authStorageError ? "" : `<form class="auth-form" data-auth-form="${firstUser ? "setup" : "login"}" autocomplete="on">
-            <label>Nombre de usuario<input class="field" name="username" type="text" minlength="3" maxlength="40" autocomplete="username" required autofocus></label>
+          ${authStorageError ? "" : `<form id="auth-login-form" class="auth-form" name="login" method="post" data-auth-form="${firstUser ? "setup" : "login"}" autocomplete="on">
+            <label>Nombre de usuario<input class="field" name="username" type="text" minlength="3" maxlength="40" value="${safe(rememberedUsername)}" autocapitalize="none" spellcheck="false" autocomplete="username" required${firstUser ? " autofocus" : ""}></label>
             <label>Contraseña<input class="field" name="password" type="password" minlength="8" autocomplete="${firstUser ? "new-password" : "current-password"}" required></label>
             ${firstUser ? `<label>Repetir contraseña<input class="field" name="passwordConfirm" type="password" minlength="8" autocomplete="new-password" required></label>` : ""}
+            <label class="auth-remember"><input type="checkbox" name="rememberUsername" checked> Recordar mi usuario en este dispositivo</label>
+            <p class="price-type-note">Solo se guarda el usuario, no la contraseña. En iPhone, Safari puede completar una clave guardada en Contraseñas con Face ID si la app está publicada con HTTPS y el autorrelleno está activado.</p>
             <p class="auth-error" data-auth-error role="alert">${safe(message)}</p>
             <button class="btn btn-primary" type="submit">${firstUser ? "Crear usuario y entrar" : "Ingresar"}</button>
           </form>`}`;
@@ -986,6 +1058,7 @@
             const user = { id: crypto.randomUUID(), username, ...credentials };
             authUsers = [user];
             if (!saveAuthUsers()) { renderAuth("No se pudo guardar el usuario. Inténtalo nuevamente."); return; }
+            saveRememberedUsername(username, data.get("rememberUsername") === "on");
             unlockApplication(user);
             notify("Usuario creado. Ya puedes usar la aplicación.");
             return;
@@ -998,6 +1071,7 @@
           const matches = actual.length === expected.length
             && actual.reduce((difference, byte, index) => difference | (byte ^ expected[index]), 0) === 0;
           if (!matches) { setAuthError("Usuario o contraseña incorrectos."); return; }
+          saveRememberedUsername(username, data.get("rememberUsername") === "on");
           unlockApplication(user);
         } catch (error) {
           console.error("No se pudo validar la cuenta local:", error);
@@ -1158,6 +1232,7 @@
         if (!state.documents.clientBudget || typeof state.documents.clientBudget !== "object") state.documents.clientBudget = null;
         if (!state.documents.materialsList || typeof state.documents.materialsList !== "object") state.documents.materialsList = null;
         if (!state.documents.cutList || typeof state.documents.cutList !== "object") state.documents.cutList = null;
+        ensureCutOptimizerDraft(state.documents);
         ensureMaterialCatalog(state.documents);
         ensureLaborRates(state.documents);
         persist();
@@ -1590,6 +1665,501 @@
             <div class="cut-actions"><button class="btn btn-primary" type="button" data-cut-print>Imprimir lista y cálculo</button><button class="btn" type="button" data-page="material-prices">Editar materiales y precios</button></div>
           </section>`;
       }
+      function cutOptimizerRow(item = {}) {
+        return `<tr>
+          <td><input type="text" maxlength="70" data-optimizer-field="name" value="${safe(item.name || "")}" placeholder="Ej. Puerta" aria-label="Nombre de la pieza"></td>
+          <td><input type="text" maxlength="80" data-optimizer-field="location" value="${safe(item.location || "")}" placeholder="Ej. Cocina" aria-label="Lugar de la pieza"></td>
+          <td><input type="number" min="0" step="any" data-optimizer-field="width" value="${safe(item.width ?? "")}" placeholder="cm" aria-label="Ancho en centímetros"></td>
+          <td><input type="number" min="0" step="any" data-optimizer-field="length" value="${safe(item.length ?? "")}" placeholder="cm" aria-label="Largo en centímetros"></td>
+          <td><input class="optimizer-quantity" type="number" min="1" max="500" step="1" data-optimizer-field="quantity" value="${safe(item.quantity ?? "")}" placeholder="Cant." aria-label="Cantidad"></td>
+          <td><button class="cut-line-remove" type="button" data-optimizer-remove aria-label="Eliminar pieza">×</button></td>
+        </tr>`;
+      }
+      function cutOptimizerPage() {
+        const draft = state.documents.cutOptimizer || {};
+        const rows = Array.isArray(draft.pieces) && draft.pieces.length ? draft.pieces : [{}];
+        const result = draft.result && Array.isArray(draft.result.sheets) ? draft.result : null;
+        return `${heading("Cortes y placas", "Optimizador de cortes", "Organiza las piezas sobre placas, indicando en qué lugar de la obra va cada una.")}
+          <section class="cut-optimizer" aria-label="Optimizador de cortes">
+           <div class="cut-card optimizer-inputs">
+             <div class="card-head"><div><h2 class="card-title">Medidas de la placa</h2><div class="card-hint">Indica el ancho y el largo de la tabla en centímetros.</div></div></div>
+             <div class="optimizer-settings">
+               <label>Ancho de la placa (cm)<input class="field" type="number" min="0" step="any" data-optimizer-field="boardWidth" value="${safe(draft.boardWidth ?? "183")}"></label>
+               <label>Largo de la placa (cm)<input class="field" type="number" min="0" step="any" data-optimizer-field="boardLength" value="${safe(draft.boardLength ?? "275")}"></label>
+               <p class="price-type-note">El cálculo prueba automáticamente ambas orientaciones de cada pieza y aplica las tolerancias fijas de corte y escuadrado.</p>
+             </div>
+             <div class="card-head"><div><h2 class="card-title">Piezas a cortar</h2><div class="card-hint">El lugar es opcional y aparecerá junto a cada pieza del plano.</div></div></div>
+             <div class="optimizer-table-wrap"><table class="optimizer-pieces"><thead><tr><th>PIEZA</th><th>LUGAR / AMBIENTE</th><th>ANCHO (cm)</th><th>LARGO (cm)</th><th>CANTIDAD</th><th></th></tr></thead><tbody id="optimizer-piece-rows">${rows.map((item) => cutOptimizerRow(item)).join("")}</tbody></table></div>
+             <div class="optimizer-toolbar"><button class="btn" type="button" data-optimizer-add>＋ Agregar pieza</button><button class="btn btn-primary" type="button" data-optimizer-run>Optimizar cortes</button></div>
+             <p class="cut-note">Prueba automáticamente varias distribuciones y ambas orientaciones, prioriza usar menos placas y luego aprovecha mejor los sobrantes. En placas con veta, revisa el sentido de las piezas giradas. Referencia: corte mínimo 5 × 5 cm.</p>
+           </div>
+           <div class="optimizer-results" data-optimizer-results>${cutOptimizerResultsMarkup(result)}</div>
+          </section>`;
+      }
+      function readCutOptimizerDraft() {
+        const sheet = content.querySelector(".cut-optimizer");
+        return {
+          boardWidth: sheet.querySelector('[data-optimizer-field="boardWidth"]').value,
+          boardLength: sheet.querySelector('[data-optimizer-field="boardLength"]').value,
+          pieces: [...sheet.querySelectorAll("#optimizer-piece-rows tr")].map((row) => ({
+           name: row.querySelector('[data-optimizer-field="name"]').value,
+           location: row.querySelector('[data-optimizer-field="location"]').value,
+           width: row.querySelector('[data-optimizer-field="width"]').value,
+           length: row.querySelector('[data-optimizer-field="length"]').value,
+           quantity: row.querySelector('[data-optimizer-field="quantity"]').value
+          }))
+        };
+      }
+      function saveCutOptimizerDraft() {
+        const sheet = content.querySelector(".cut-optimizer");
+        if (!sheet) return;
+        state.documents.cutOptimizer = { ...readCutOptimizerDraft(), result: null };
+        sheet.querySelector("[data-optimizer-results]").innerHTML = "";
+        persist();
+      }
+      function optimizeCutLayout() {
+        const draft = readCutOptimizerDraft();
+        const boardWidth = Number(draft.boardWidth);
+        const boardLength = Number(draft.boardLength);
+        const kerf = 0.5;
+        const trim = 1;
+        if (!Number.isFinite(boardWidth) || boardWidth <= 0 || !Number.isFinite(boardLength) || boardLength <= 0) {
+          notify("Indica un ancho y un largo válidos para la placa.");
+          return null;
+        }
+        if (boardWidth <= trim * 2 || boardLength <= trim * 2) {
+          notify("Las medidas de la placa deben dejar superficie útil después del escuadrado.");
+          return null;
+        }
+        const usableWidth = boardWidth - trim * 2;
+        const usableLength = boardLength - trim * 2;
+        const enteredRows = draft.pieces.filter((piece) =>
+          [piece.name, piece.location, piece.width, piece.length, piece.quantity].some((value) => String(value).trim() !== "")
+        );
+        if (!enteredRows.length) {
+          notify("Agrega al menos una pieza con medidas y cantidad.");
+          return null;
+        }
+        const pieces = [];
+        for (const [rowIndex, piece] of enteredRows.entries()) {
+          const width = Number(piece.width);
+          const length = Number(piece.length);
+          const quantity = Number(piece.quantity);
+          if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(length) || length <= 0
+           || !Number.isInteger(quantity) || quantity <= 0 || quantity > 500) {
+           notify(`Revisa las medidas y la cantidad de la pieza ${rowIndex + 1}.`);
+           return null;
+          }
+          if (width < 5 || length < 5) {
+           notify(`La pieza ${piece.name.trim() || rowIndex + 1} es menor que el corte mínimo de 5 × 5 cm.`);
+           return null;
+          }
+          const canRotate = true;
+          const fits = (width <= usableWidth && length <= usableLength)
+           || (canRotate && length <= usableWidth && width <= usableLength);
+          if (!fits) {
+           notify(`La pieza ${piece.name.trim() || rowIndex + 1} no entra en la placa${canRotate ? ", incluso girada." : " sin girarla."}`);
+           return null;
+          }
+          if (pieces.length + quantity > 500) {
+           notify("El optimizador admite hasta 500 piezas por cálculo.");
+           return null;
+          }
+          for (let index = 0; index < quantity; index++) {
+           pieces.push({
+             id: pieces.length + 1,
+             name: piece.name.trim() || `Pieza ${rowIndex + 1}`,
+             location: piece.location.trim() || "Sin lugar indicado",
+             width,
+             length,
+             allowRotation: canRotate,
+             sequence: pieces.length
+           });
+          }
+        }
+        const epsilon = 1e-7;
+        const usableFreeRects = (free, width, length, split) => {
+          const rightWidth = free.width - width - kerf;
+          const bottomLength = free.length - length - kerf;
+          const rectangles = [];
+          const add = (x, y, rectWidth, rectLength) => {
+           if (rectWidth > epsilon && rectLength > epsilon) rectangles.push({ x, y, width: rectWidth, length: rectLength });
+          };
+          if (split === "vertical") {
+           add(free.x + width + kerf, free.y, rightWidth, free.length);
+           add(free.x, free.y + length + kerf, width, bottomLength);
+          } else {
+           add(free.x + width + kerf, free.y, rightWidth, length);
+           add(free.x, free.y + length + kerf, free.width, bottomLength);
+          }
+          return rectangles;
+        };
+        const compareScores = (first, second) => {
+          for (let index = 0; index < Math.min(first.length, second.length); index++) {
+           if (Math.abs(first[index] - second[index]) > epsilon) return first[index] - second[index];
+          }
+          return 0;
+        };
+        const findPlacement = (sheet, piece) => {
+          let best = null;
+          const orientations = piece.allowRotation && piece.width !== piece.length
+           ? [[piece.width, piece.length, false], [piece.length, piece.width, true]]
+           : [[piece.width, piece.length, false]];
+          sheet.free.forEach((free, freeIndex) => {
+           orientations.forEach(([width, length, rotated]) => {
+             if (width > free.width + epsilon || length > free.length + epsilon) return;
+             for (const split of ["vertical", "horizontal"]) {
+               const remnants = usableFreeRects(free, width, length, split);
+               const largestRemnant = remnants.reduce((largest, item) => Math.max(largest, item.width * item.length), 0);
+               const remnantArea = remnants.reduce((sum, item) => sum + item.width * item.length, 0);
+               const score = [
+                 free.width * free.length - width * length - remnantArea,
+                 Math.min(Math.max(0, free.width - width), Math.max(0, free.length - length)),
+                 Math.max(Math.max(0, free.width - width), Math.max(0, free.length - length)),
+                 -largestRemnant
+               ];
+               if (!best || compareScores(score, best.score) < 0) {
+                 best = { freeIndex, width, length, rotated, split, remnants, score };
+               }
+             }
+           });
+          });
+          return best;
+        };
+        const orders = [
+          (first, second) => second.width * second.length - first.width * first.length
+           || Math.max(second.width, second.length) - Math.max(first.width, first.length),
+          (first, second) => Math.max(second.width, second.length) - Math.max(first.width, first.length)
+           || second.width * second.length - first.width * first.length,
+          (first, second) => second.width - first.width || second.length - first.length,
+          (first, second) => second.length - first.length || second.width - first.width,
+          (first, second) => (second.width + second.length) - (first.width + first.length)
+           || second.width * second.length - first.width * first.length,
+          (first, second) => Math.max(second.width, second.length) / Math.min(second.width, second.length)
+           - Math.max(first.width, first.length) / Math.min(first.width, first.length)
+           || second.width * second.length - first.width * first.length,
+          (first, second) => Math.min(second.width, second.length) - Math.min(first.width, first.length)
+           || second.width * second.length - first.width * first.length,
+          (first, second) => second.width * second.length - first.width * first.length
+           || first.sequence - second.sequence
+        ];
+        const buildPlan = (order, reverseTies) => {
+          const sheets = [];
+          for (const piece of order) {
+           let sheetIndex = -1;
+           let placement = null;
+           sheets.forEach((sheet, index) => {
+             const candidate = findPlacement(sheet, piece);
+             const scoreOrder = candidate && placement
+               ? compareScores(candidate.score, placement.score)
+               : 0;
+             if (candidate && (!placement || scoreOrder < 0
+               || scoreOrder === 0 && (reverseTies ? index > sheetIndex : index < sheetIndex))) {
+               placement = candidate;
+               sheetIndex = index;
+             }
+           });
+           if (!placement) {
+             sheets.push({ free: [{ x: trim, y: trim, width: usableWidth, length: usableLength }], pieces: [] });
+             sheetIndex = sheets.length - 1;
+             placement = findPlacement(sheets[sheetIndex], piece);
+           }
+           if (!placement) return null;
+           const sheet = sheets[sheetIndex];
+           const free = sheet.free.splice(placement.freeIndex, 1)[0];
+           sheet.pieces.push({
+             id: piece.id,
+             name: piece.name,
+             location: piece.location,
+             originalWidth: piece.width,
+             originalLength: piece.length,
+             x: free.x,
+             y: free.y,
+             width: placement.width,
+             length: placement.length,
+             rotated: placement.rotated
+           });
+           sheet.free.push(...placement.remnants);
+          }
+          const pieceArea = order.reduce((sum, piece) => sum + piece.width * piece.length, 0);
+          const remainingArea = sheets.reduce((sum, sheet) =>
+           sum + sheet.free.reduce((sheetArea, free) => sheetArea + free.width * free.length, 0), 0
+          );
+          const largestRemnants = sheets.reduce((sum, sheet) =>
+           sum + sheet.free.reduce((largest, free) => Math.max(largest, free.width * free.length), 0), 0
+          );
+          const remnantCount = sheets.reduce((sum, sheet) => sum + sheet.free.length, 0);
+          return {
+           sheets,
+           score: [
+             sheets.length,
+             sheets.length * usableWidth * usableLength - pieceArea - remainingArea,
+             -largestRemnants,
+             remnantCount
+           ]
+          };
+        };
+        let bestPlan = null;
+        for (const compare of orders) {
+          for (const reverseTies of [false, true]) {
+           const order = [...pieces].sort((first, second) =>
+             compare(first, second) || (reverseTies ? second.sequence - first.sequence : first.sequence - second.sequence)
+           );
+           const plan = buildPlan(order, reverseTies);
+           if (plan && (!bestPlan || compareScores(plan.score, bestPlan.score) < 0)) bestPlan = plan;
+          }
+        }
+        if (!bestPlan) {
+          notify("No se pudo acomodar una de las piezas en el plano.");
+          return null;
+        }
+        const usedArea = pieces.reduce((sum, piece) => sum + piece.width * piece.length, 0);
+        return {
+          boardWidth,
+          boardLength,
+          trim,
+          requestedCount: pieces.length,
+          usagePercent: usedArea / (bestPlan.sheets.length * usableWidth * usableLength) * 100,
+          sheets: bestPlan.sheets
+        };
+      }
+      function cutOptimizerResultsMarkup(result) {
+        if (!result || !Array.isArray(result.sheets)) return "";
+        const format = (value) => Number(value).toLocaleString("es-AR", { maximumFractionDigits: 2 });
+        const numeric = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+        const colors = ["#f3c778", "#95c7b1", "#9eb8dc", "#e7a49a", "#c4abd9", "#a9c8c0", "#e7b6d2"];
+        const sheetsMarkup = result.sheets.map((sheet, sheetIndex) => {
+          const boardWidth = numeric(result.boardWidth);
+          const boardLength = numeric(result.boardLength);
+          const trim = numeric(result.trim);
+          const usableWidth = boardWidth - trim * 2;
+          const usableLength = boardLength - trim * 2;
+          const patternId = `optimizer-remnant-${sheetIndex}`;
+          const trimPatternId = `optimizer-trim-${sheetIndex}`;
+          const remnants = Array.isArray(sheet.free) ? sheet.free : [];
+          const cutPieces = Array.isArray(sheet.pieces) ? sheet.pieces : [];
+          const remnantArea = remnants.reduce((sum, item) => sum + numeric(item.width) * numeric(item.length), 0);
+          const reusableRemnants = remnants.filter((item) => Math.min(numeric(item.width), numeric(item.length)) >= 5).length;
+          const piecesSvg = cutPieces.map((piece, index) => {
+           const x = numeric(piece.x);
+           const y = numeric(piece.y);
+           const width = numeric(piece.width);
+           const length = numeric(piece.length);
+           const color = colors[index % colors.length];
+           const label = `${String(piece.name || "Pieza")} · ${format(width)} × ${format(length)} cm`;
+           const text = width >= 18 && length >= 9
+             ? `<text x="${x + 2}" y="${y + Math.min(length / 2 + 1, 6)}" fill="#302b25" font-size="${Math.min(width / 7, length / 2.4, 4)}">${safe(String(piece.name || "Pieza"))}</text>`
+             : "";
+           return `<g><title>${safe(`${piece.name || "Pieza"} · ${piece.location || "Sin lugar"} · ${label}`)}</title><rect x="${x}" y="${y}" width="${width}" height="${length}" fill="${color}" stroke="#fff" stroke-width="0.7"/>${text}</g>`;
+          }).join("");
+          const remnantsSvg = remnants.map((item) => {
+           const x = numeric(item.x);
+           const y = numeric(item.y);
+           const width = numeric(item.width);
+           const length = numeric(item.length);
+           const reusable = Math.min(width, length) >= 5;
+           const text = width >= 28 && length >= 12
+             ? `<text x="${x + 2}" y="${y + Math.min(length / 2 + 1, 6)}" fill="#625b52" font-size="${Math.min(width / 8, length / 2.8, 3.6)}">${reusable ? "Sobrante" : "Retazo"} · ${format(width)} × ${format(length)} cm</text>`
+             : "";
+           return `<g><title>${reusable ? "Sobrante recuperable" : "Retazo menor al corte mínimo"} ${format(width)} × ${format(length)} cm</title><rect x="${x}" y="${y}" width="${width}" height="${length}" fill="url(#${patternId})" stroke="#c8c0b7" stroke-width="0.5"/>${text}</g>`;
+          }).join("");
+          const remnantsList = remnants.length
+           ? remnants.map((item, index) => {
+             const reusable = Math.min(numeric(item.width), numeric(item.length)) >= 5;
+             return `<div class="optimizer-remnant${reusable ? "" : " optimizer-waste"}"><span>${reusable ? "Sobrante" : "Retazo no recuperable"} ${index + 1}</span><strong>${format(numeric(item.width))} × ${format(numeric(item.length))} cm</strong><span>${format(numeric(item.width) * numeric(item.length) / 10000)} m²</span></div>`;
+           }).join("")
+           : `<div class="optimizer-remnant-empty">No queda un sobrante recuperable en esta placa.</div>`;
+          const pieceTags = cutPieces.map((piece) =>
+           `<span class="optimizer-piece-tag">${safe(piece.name || "Pieza")} · ${safe(piece.location || "Sin lugar indicado")}${piece.rotated ? " · girada" : ""}</span>`
+          ).join("");
+          return `<article class="cut-card optimizer-sheet-card">
+           <div class="optimizer-sheet-head"><h3>Placa ${sheetIndex + 1}</h3><span>${cutPieces.length} piezas · ${format(usableWidth)} × ${format(usableLength)} cm útiles · ${format(remnantArea / 10000)} m² libres</span></div>
+           <svg class="optimizer-board" viewBox="0 0 ${boardWidth} ${boardLength}" role="img" aria-label="Plano de corte de la placa ${sheetIndex + 1}">
+             <defs><pattern id="${patternId}" width="2" height="2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="2" fill="#f3f0eb"/><path d="M 0 0 L 0 2" stroke="#ded8cf" stroke-width="0.6"/></pattern><pattern id="${trimPatternId}" width="2" height="2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="2" fill="#eee9e2"/><path d="M 0 0 L 0 2" stroke="#c8c0b7" stroke-width="0.7"/></pattern></defs>
+             <rect x="0" y="0" width="${boardWidth}" height="${boardLength}" fill="url(#${trimPatternId})"/>
+             ${remnantsSvg}${piecesSvg}<rect x="${trim}" y="${trim}" width="${usableWidth}" height="${usableLength}" fill="none" stroke="#847d74" stroke-width="0.6" stroke-dasharray="2 1" pointer-events="none"/><rect x="0" y="0" width="${boardWidth}" height="${boardLength}" fill="none" stroke="#847d74" stroke-width="0.8" pointer-events="none"/>
+           </svg>
+           <div class="optimizer-piece-row">${pieceTags}</div>
+           <div class="optimizer-remnants">${remnantsList}</div>
+          </article>`;
+        }).join("");
+        const reusableCount = result.sheets.reduce((count, sheet) =>
+          count + (Array.isArray(sheet.free) ? sheet.free.filter((item) => Math.min(numeric(item.width), numeric(item.length)) >= 5).length : 0), 0
+        );
+        return `<div class="optimizer-toolbar"><button class="btn btn-primary" type="button" data-optimizer-pdf>Descargar / enviar PDF</button></div>
+          <div class="optimizer-summary" aria-live="polite">
+           <div class="optimizer-stat"><span>Placas necesarias</span><strong>${result.sheets.length}</strong></div>
+           <div class="optimizer-stat"><span>Piezas distribuidas</span><strong>${numeric(result.requestedCount)}</strong></div>
+           <div class="optimizer-stat"><span>Aprovechamiento estimado</span><strong>${format(numeric(result.usagePercent))}%</strong></div>
+           <div class="optimizer-stat"><span>Sobrantes recuperables</span><strong>${reusableCount}</strong></div>
+          </div>
+          <div class="optimizer-sheet-list">${sheetsMarkup}</div>
+          <p class="cut-note">Aprovechamiento calculado por superficie de piezas. La propuesta usa cortes rectos; valida veta, escuadra y condiciones reales de la placa antes de cortar.</p>`;
+      }
+      function buildCutOptimizerPdf(draft, result) {
+        const pageWidth = 842;
+        const pageHeight = 595;
+        const pages = [];
+        const format = (value) => Number(value).toLocaleString("es-AR", { maximumFractionDigits: 2 });
+        const pieceCode = (id) => `P${String(id).padStart(3, "0")}`;
+        const addText = (commands, text, x, top, size = 9, bold = false, color = "0 0 0") => {
+          commands.push(`${color} rg`);
+          commands.push(pdfText(text, x, pageHeight - top - size, size, bold));
+        };
+        const addLine = (commands, x1, y1, x2, y2, color = "0.78 0.78 0.78", width = 0.6) => {
+          commands.push(`${color} RG ${width} w ${x1} ${pageHeight - y1} m ${x2} ${pageHeight - y2} l S`);
+        };
+        const addRect = (commands, x, top, width, height, fill, stroke = "0.8 0.8 0.8") => {
+          commands.push(`${fill} rg ${stroke} RG 0.6 w ${x} ${pageHeight - top - height} ${width} ${height} re B`);
+        };
+        const pageFor = (commands) => pages.push({ width: pageWidth, height: pageHeight, stream: commands.join("\n") });
+        const plateByPiece = new Map();
+        result.sheets.forEach((sheet, sheetIndex) => {
+          sheet.pieces.forEach((piece) => {
+            const plates = plateByPiece.get(piece.id) || [];
+            plates.push(sheetIndex + 1);
+            plateByPiece.set(piece.id, plates);
+          });
+        });
+        const inputRows = Array.isArray(draft.pieces) ? draft.pieces : [];
+        const rows = [];
+        let nextId = 1;
+        inputRows.forEach((piece) => {
+          const quantity = Number(piece.quantity);
+          if (!Number.isInteger(quantity) || quantity <= 0) return;
+          for (let index = 0; index < quantity; index++) {
+            const id = nextId++;
+            const plates = [...new Set(plateByPiece.get(id) || [])].sort((a, b) => a - b);
+            rows.push({
+              id: pieceCode(id),
+              name: String(piece.name || "").trim() || "Pieza",
+              location: String(piece.location || "").trim() || "Sin lugar indicado",
+              width: format(Number(piece.width)),
+              length: format(Number(piece.length)),
+              quantity: 1,
+              plates: plates.length ? plates.join(", ") : "—"
+            });
+          }
+        });
+        const pageSize = 21;
+        const listPageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+        for (let pageIndex = 0; pageIndex < listPageCount; pageIndex++) {
+          const commands = ["1 J 1 j"];
+          addText(commands, "BAMINO CONSTRUCCIONES - PLAN DE CORTE", 36, 28, 17, true, "0.13 0.13 0.13");
+          addText(commands, `Lista completa de piezas | ${rows.length} cortes | Medidas en centimetros`, 36, 55, 9, false, "0.35 0.35 0.35");
+          addText(commands, `Placa: ${format(result.boardWidth)} x ${format(result.boardLength)} cm | Sierra: 0.5 cm | Escuadrado: 1 cm por borde`, 36, 72, 9, false, "0.35 0.35 0.35");
+          if (listPageCount > 1) addText(commands, `Lista - pagina ${pageIndex + 1} de ${listPageCount}`, 692, 55, 8, false, "0.35 0.35 0.35");
+          const columns = [36, 94, 290, 440, 520, 600, 660, 806];
+          const headerTop = 107;
+          const rowHeight = 20;
+          addRect(commands, columns[0], headerTop, columns[7] - columns[0], 24, "0.94 0.93 0.91");
+          ["ID", "PIEZA", "LUGAR / AMBIENTE", "ANCHO", "LARGO", "CANT.", "PLACA"].forEach((label, index) =>
+            addText(commands, label, columns[index] + 5, headerTop + 7, 8, true, "0.24 0.22 0.20")
+          );
+          const pageRows = rows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+          pageRows.forEach((row, rowIndex) => {
+            const top = headerTop + 24 + rowIndex * rowHeight;
+            if (rowIndex % 2 === 1) addRect(commands, columns[0], top, columns[7] - columns[0], rowHeight, "0.985 0.98 0.97", "0.985 0.98 0.97");
+            addLine(commands, columns[0], top + rowHeight, columns[7], top + rowHeight);
+            const values = [row.id, row.name, row.location, row.width, row.length, String(row.quantity), row.plates];
+            values.forEach((value, index) =>
+              addText(commands, String(value).slice(0, index === 1 || index === 2 ? 31 : 14), columns[index] + 5, top + 6, 8, index === 0, "0.18 0.18 0.18")
+            );
+          });
+          addText(commands, "Identifica cada pieza en los planos por su codigo P###. Revisa sentido de veta y medidas antes de cortar.", 36, 558, 8, false, "0.38 0.38 0.38");
+          pageFor(commands);
+        }
+        const colors = [
+          [0.95, 0.78, 0.47], [0.58, 0.78, 0.69], [0.62, 0.72, 0.86],
+          [0.90, 0.65, 0.60], [0.77, 0.67, 0.85], [0.66, 0.78, 0.75], [0.91, 0.71, 0.82]
+        ];
+        result.sheets.forEach((sheet, sheetIndex) => {
+          const commands = ["1 J 1 j"];
+          const boardWidth = Number(result.boardWidth);
+          const boardLength = Number(result.boardLength);
+          const trim = Number(result.trim) || 1;
+          const usableWidth = boardWidth - trim * 2;
+          const usableLength = boardLength - trim * 2;
+          const maxWidth = 752;
+          const maxHeight = 420;
+          const scale = Math.min(maxWidth / boardWidth, maxHeight / boardLength);
+          const drawingWidth = boardWidth * scale;
+          const drawingHeight = boardLength * scale;
+          const originX = (pageWidth - drawingWidth) / 2;
+          const originTop = 105 + (maxHeight - drawingHeight) / 2;
+          addText(commands, `PLANO DE CORTE - PLACA ${sheetIndex + 1} DE ${result.sheets.length}`, 36, 28, 16, true, "0.13 0.13 0.13");
+          addText(commands, `${format(boardWidth)} x ${format(boardLength)} cm | Superficie util ${format(usableWidth)} x ${format(usableLength)} cm | Sierra 5 mm | Recorte 10 mm por borde`, 36, 55, 9, false, "0.35 0.35 0.35");
+          addRect(commands, originX, originTop, drawingWidth, drawingHeight, "0.93 0.91 0.88", "0.4 0.38 0.35");
+          commands.push("[2 2] 0 d");
+          commands.push(`0.4 0.38 0.35 RG 0.5 w ${originX + trim * scale} ${pageHeight - originTop - trim * scale - usableLength * scale} ${usableWidth * scale} ${usableLength * scale} re S`);
+          commands.push("[] 0 d");
+          sheet.pieces.forEach((piece, pieceIndex) => {
+            const x = originX + Number(piece.x) * scale;
+            const top = originTop + Number(piece.y) * scale;
+            const width = Number(piece.width) * scale;
+            const length = Number(piece.length) * scale;
+            const [red, green, blue] = colors[pieceIndex % colors.length];
+            addRect(commands, x, top, width, length, `${red} ${green} ${blue}`, "1 1 1");
+            const label = pieceCode(piece.id);
+            const fontSize = Math.max(4, Math.min(8, width * 0.4, length * 0.35));
+            const labelWidth = label.length * fontSize * 0.55;
+            if (width > labelWidth + 4 && length > fontSize + 4) {
+              addText(commands, label, x + Math.max(2, (width - labelWidth) / 2), top + Math.max(2, (length - fontSize) / 2), fontSize, true, "0.12 0.12 0.12");
+            }
+          });
+          addText(commands, `${sheet.pieces.length} piezas | Los codigos del dibujo corresponden a la lista completa del informe.`, 36, 550, 8, false, "0.35 0.35 0.35");
+          pageFor(commands);
+        });
+        const objects = [
+          "<< /Type /Catalog /Pages 2 0 R >>",
+          `<< /Type /Pages /Kids [${pages.map((_, index) => `${5 + index * 2} 0 R`).join(" ")}] /Count ${pages.length} >>`,
+          "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
+          "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"
+        ];
+        pages.forEach((page) => {
+          const pageObjectId = objects.length + 1;
+          const contentObjectId = pageObjectId + 1;
+          objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${page.width} ${page.height}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObjectId} 0 R >>`);
+          objects.push(`<< /Length ${page.stream.length} >>\nstream\n${page.stream}\nendstream`);
+        });
+        let pdf = "%PDF-1.4\n";
+        const offsets = [0];
+        objects.forEach((object, index) => {
+          offsets.push(pdf.length);
+          pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+        });
+        const xrefOffset = pdf.length;
+        pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+        offsets.slice(1).forEach((offset) => { pdf += `${String(offset).padStart(10, "0")} 00000 n \n`; });
+        pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+        return pdf;
+      }
+      async function shareCutOptimizerPdf() {
+        const draft = readCutOptimizerDraft();
+        const result = optimizeCutLayout();
+        if (!result) return;
+        state.documents.cutOptimizer = { ...draft, result };
+        persist();
+        content.querySelector("[data-optimizer-results]").innerHTML = cutOptimizerResultsMarkup(result);
+        const file = new File([buildCutOptimizerPdf(draft, result)], `Plan-de-corte-${day(0)}.pdf`, { type: "application/pdf" });
+        const shareData = { files: [file], title: "Plan de corte - Bamino Construcciones", text: "Plano de corte y lista completa de piezas." };
+        if (navigator.share && navigator.canShare?.(shareData)) {
+          try {
+            await navigator.share(shareData);
+            notify("Plan de corte compartido.");
+          } catch (error) {
+            if (error.name === "AbortError") return;
+            console.error("No se pudo compartir el plan de corte:", error);
+            downloadClientBudgetPdf(file);
+            notify("No se pudo abrir el menú para compartir. Se descargó el PDF para enviarlo.");
+          }
+          return;
+        }
+        downloadClientBudgetPdf(file);
+        const whatsapp = window.open(`https://wa.me/?text=${encodeURIComponent("Hola, te comparto el plan de corte. Adjunta el archivo PDF descargado para enviarlo.")}`, "_blank");
+        if (whatsapp) whatsapp.opener = null;
+        notify("Se descargó el PDF. Adjunta el archivo descargado para enviarlo por WhatsApp.");
+      }
       function pdfSafeText(value) {
         return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
           .replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim();
@@ -1773,7 +2343,7 @@
       function render() {
         renderNav();
         document.getElementById("breadcrumb").textContent = navItems.find(([id]) => id === currentPage)?.[1] || "Panel";
-        const pages = { dashboard, projects: projectsPage, clients: clientsPage, calendar: calendarPage, budgets: budgetsPage, "client-budget": clientBudgetPage, payments: paymentsPage, finance: financePage, notes: notesPage, stats: statsPage, inventory: inventoryPage, "materials-list": materialsListPage, "cut-calculator": cutCalculatorPage, "material-prices": materialPricesPage, settings: settingsPage };
+        const pages = { dashboard, projects: projectsPage, clients: clientsPage, calendar: calendarPage, budgets: budgetsPage, "client-budget": clientBudgetPage, payments: paymentsPage, finance: financePage, notes: notesPage, stats: statsPage, inventory: inventoryPage, "materials-list": materialsListPage, "cut-calculator": cutCalculatorPage, "material-prices": materialPricesPage, "cut-optimizer": cutOptimizerPage, settings: settingsPage };
         content.innerHTML = pages[currentPage]();
         if (currentPage === "cut-calculator") updateCutCalculator();
         if (currentPage === "material-prices") updatePriceRows();
@@ -2131,6 +2701,31 @@
           window.print();
           return;
         }
+        if (target.hasAttribute("data-optimizer-add")) {
+          document.getElementById("optimizer-piece-rows").insertAdjacentHTML("beforeend", cutOptimizerRow());
+          saveCutOptimizerDraft();
+          return;
+        }
+        if (target.hasAttribute("data-optimizer-remove")) {
+          target.closest("tr").remove();
+          saveCutOptimizerDraft();
+          return;
+        }
+        if (target.hasAttribute("data-optimizer-run")) {
+          const result = optimizeCutLayout();
+          if (!result) return;
+          state.documents.cutOptimizer = { ...readCutOptimizerDraft(), result };
+          persist();
+          content.querySelector("[data-optimizer-results]").innerHTML = cutOptimizerResultsMarkup(result);
+          return;
+        }
+        if (target.hasAttribute("data-optimizer-pdf")) {
+          shareCutOptimizerPdf().catch((error) => {
+            console.error("No se pudo generar el PDF del plan de corte:", error);
+            notify("No se pudo generar el PDF. Revisa los datos e inténtalo nuevamente.");
+          });
+          return;
+        }
         if (target.hasAttribute("data-add-material-row")) {
           document.getElementById("materials-list-rows")?.insertAdjacentHTML("beforeend", materialsListRow());
           saveDocumentDraft("materials-list");
@@ -2247,6 +2842,9 @@
           updateCutCalculator();
           saveDocumentDraft("cut-calculator");
         }
+        if (event.target.closest(".cut-optimizer")) {
+          saveCutOptimizerDraft();
+        }
         if (event.target.closest(".price-list")) saveDocumentDraft("material-prices");
       });
       content.addEventListener("change", (event) => {
@@ -2259,6 +2857,7 @@
           updateCutCalculator();
           saveDocumentDraft("cut-calculator");
         }
+        if (event.target.closest(".cut-optimizer")) saveCutOptimizerDraft();
         if (event.target.closest(".price-list")) {
           updatePriceRows();
           saveDocumentDraft("material-prices");
