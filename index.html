@@ -275,6 +275,18 @@
     .client-budget-sheet .budget-actions { margin-top: 15px; text-align: center; }
     .client-budget-sheet .budget-actions button { padding: 5px 10px; border: 1px solid #777; border-radius: 3px; color: #000; background: #f5f5f5; font: 12px Arial, sans-serif; }
     .client-budget-sheet .budget-actions button + button { margin-left: 10px; }
+    .client-budget-detail-sheet {
+      width: 100%; max-width: 660px; margin: 18px auto 0; padding: 15px 30px; border: 1px solid #000;
+      color: #000; background: #fff; font-family: Arial, sans-serif; font-size: 12px;
+    }
+    .client-budget-detail-sheet h2 { margin: 0 0 8px; font-size: 18px; }
+    .client-budget-detail-sheet .detail-heading { padding-bottom: 8px; border-bottom: 2px solid #000; }
+    .client-budget-detail-sheet .detail-identification { display: flex; justify-content: space-between; gap: 16px; margin: 12px 0; }
+    .client-budget-detail-sheet .detail-identification strong { font-weight: 700; }
+    .client-budget-detail-sheet textarea {
+      display: block; width: 100%; min-height: 520px; padding: 8px 0; border: 0; border-radius: 0;
+      color: #000; background: transparent; font: 13px/1.6 Arial, sans-serif; resize: vertical;
+    }
     .materials-list-sheet { width: min(980px, 100%); margin: 0 auto; padding: 24px; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: var(--shadow); }
     .materials-list-details { display: grid; gap: 10px; margin-bottom: 16px; }
     .materials-list-group { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
@@ -375,15 +387,22 @@
       body:has(.client-budget-sheet) { background: #fff; }
       body:has(.client-budget-sheet) * { visibility: hidden !important; }
       body:has(.client-budget-sheet) .client-budget-sheet,
-      body:has(.client-budget-sheet) .client-budget-sheet * { visibility: visible !important; }
+      body:has(.client-budget-sheet) .client-budget-sheet *,
+      body:has(.client-budget-sheet) .client-budget-detail-sheet,
+      body:has(.client-budget-sheet) .client-budget-detail-sheet * { visibility: visible !important; }
       body:has(.client-budget-sheet) .client-budget-sheet {
         position: absolute; inset: 0 auto auto 0; width: 100%; max-width: none; margin: 0;
         padding: 0 15px; border: 0; box-shadow: none;
+      }
+      body:has(.client-budget-sheet) .client-budget-detail-sheet {
+        position: relative; width: 100%; max-width: none; margin: 0; padding: 0 15px;
+        border: 0; box-shadow: none; break-before: page; page-break-before: always;
       }
       body:has(.client-budget-sheet) .toast { display: none !important; }
       .client-budget-sheet input, .client-budget-sheet button { border-color: transparent; background: transparent; box-shadow: none; font-size: 12px; appearance: none; }
       .client-budget-sheet input[readonly] { border-bottom: 1px solid #000 !important; }
       .client-budget-sheet .budget-actions { display: none !important; visibility: hidden !important; }
+      .client-budget-detail-sheet textarea { min-height: 650px; border: 0; outline: 0; resize: none; overflow: hidden; }
       body:has(.materials-list-sheet) * { visibility: hidden !important; }
       body:has(.materials-list-sheet) .materials-list-sheet,
       body:has(.materials-list-sheet) .materials-list-sheet * { visibility: visible !important; }
@@ -1124,7 +1143,8 @@
               quantity: row.querySelector(".cant").value,
               description: row.querySelector(".desc").value,
               amount: row.querySelector(".importe").value
-            }))
+            })),
+            detailText: content.querySelector("#budget-detail-text").value
           };
           persist();
           return;
@@ -1492,6 +1512,9 @@
       function clientBudgetPage() {
         const draft = state.documents.clientBudget || {};
         const items = Array.isArray(draft.items) ? draft.items : [];
+        const detailText = draft.detailText ?? (Array.isArray(draft.detailItems)
+          ? draft.detailItems.map((item) => [item.quantity, item.item, item.description].filter(Boolean).join(" - ")).filter(Boolean).join("\n")
+          : "");
         const itemRows = Array.from({ length: Math.max(15, items.length) }, (_, index) => {
           const item = items[index] || {};
           return `<tr>
@@ -1540,6 +1563,17 @@
                 </div>
               </form>
             </div>
+          </section>
+          <section class="client-budget-detail-sheet" aria-label="Detalle del presupuesto">
+            <header class="detail-heading">
+              <h2>Detalle del presupuesto</h2>
+              <div>Bambino Construcciones · Hoja de detalle</div>
+            </header>
+            <div class="detail-identification">
+              <div><strong>Cliente:</strong> <span id="budget-detail-customer">${safe(draft.customer || "")}</span></div>
+              <div><strong>Presupuesto Nº:</strong> <span id="budget-detail-number">${safe(draft.number || "0001 - 00001")}</span></div>
+            </div>
+            <textarea id="budget-detail-text" aria-label="Texto libre para detallar el presupuesto" placeholder="Escribe aquí el detalle del presupuesto...">${safe(detailText)}</textarea>
           </section>`;
       }
       function materialsListRow(item = {}) {
@@ -2169,58 +2203,93 @@
         return `BT /F${bold ? 2 : 1} ${size} Tf 1 0 0 1 ${x} ${y} Tm (${escaped}) Tj ET`;
       }
       function buildClientBudgetPdf(sheet) {
-        const commands = ["0 G", "0.7 w"];
-        const drawLine = (x1, y1, x2, y2) => commands.push(`${x1} ${y1} m ${x2} ${y2} l S`);
-        commands.push(pdfText("Bambino Construcciones", 42, 795, 17, true));
-        commands.push(pdfText("De Marcos Gabriel Digiano", 42, 778, 9));
-        commands.push(pdfText("Todo para tu construccion", 42, 764, 9));
-        commands.push(pdfText("Cel. 2281 323926 - 7300 - Azul (Bs. As.)", 42, 750, 9));
-        commands.push("q 0.8 w 365 742 188 88 re S Q");
-        commands.push(pdfText("PRESUPUESTO", 405, 808, 12, true));
-        commands.push(pdfText("DOCUMENTO NO VALIDO COMO FACTURA", 376, 792, 7));
-        commands.push(pdfText(`N ${sheet.querySelector("#presupuestoNum").value}`, 378, 772, 10, true));
-        commands.push(pdfText(`FECHA: ${sheet.querySelector("#fecha").value || ""}`, 378, 752, 9, true));
-        drawLine(42, 732, 553, 732);
-        commands.push(pdfText(`Senor(es): ${sheet.querySelector("#senores").value}`, 42, 712, 10));
-        commands.push(pdfText(`Domicilio: ${sheet.querySelector("#domicilio").value}`, 42, 692, 10));
+        const firstPage = ["0 G", "0.7 w"];
+        const detailPage = ["0 G", "0.7 w"];
+        const drawLine = (commands, x1, y1, x2, y2) => commands.push(`${x1} ${y1} m ${x2} ${y2} l S`);
+        firstPage.push(pdfText("Bambino Construcciones", 42, 795, 17, true));
+        firstPage.push(pdfText("De Marcos Gabriel Digiano", 42, 778, 9));
+        firstPage.push(pdfText("Todo para tu construccion", 42, 764, 9));
+        firstPage.push(pdfText("Cel. 2281 323926 - 7300 - Azul (Bs. As.)", 42, 750, 9));
+        firstPage.push("q 0.8 w 365 742 188 88 re S Q");
+        firstPage.push(pdfText("PRESUPUESTO", 405, 808, 12, true));
+        firstPage.push(pdfText("DOCUMENTO NO VALIDO COMO FACTURA", 376, 792, 7));
+        firstPage.push(pdfText(`N ${sheet.querySelector("#presupuestoNum").value}`, 378, 772, 10, true));
+        firstPage.push(pdfText(`FECHA: ${sheet.querySelector("#fecha").value || ""}`, 378, 752, 9, true));
+        drawLine(firstPage, 42, 732, 553, 732);
+        firstPage.push(pdfText(`Senor(es): ${sheet.querySelector("#senores").value}`, 42, 712, 10));
+        firstPage.push(pdfText(`Domicilio: ${sheet.querySelector("#domicilio").value}`, 42, 692, 10));
         const cash = sheet.querySelector("#contado").checked ? "X" : " ";
         const account = sheet.querySelector("#ctaCte").checked ? "X" : " ";
-        commands.push(pdfText(`Pago: [${cash}] Contado    [${account}] Cuota`, 42, 671, 10));
+        firstPage.push(pdfText(`Pago: [${cash}] Contado    [${account}] Cuota`, 42, 671, 10));
         const columns = [42, 91, 442, 553];
         const tableTop = 651;
         const rowHeight = 22;
         const tableBottom = tableTop - rowHeight * 16;
-        drawLine(columns[0], tableTop, columns[3], tableTop);
-        drawLine(columns[0], tableTop - rowHeight, columns[3], tableTop - rowHeight);
-        drawLine(columns[0], tableBottom, columns[3], tableBottom);
-        columns.forEach((x) => drawLine(x, tableTop, x, tableBottom));
-        commands.push(pdfText("CANT.", 49, tableTop - 15, 9, true));
-        commands.push(pdfText("DESCRIPCION", 100, tableTop - 15, 9, true));
-        commands.push(pdfText("IMPORTE", 478, tableTop - 15, 9, true));
+        drawLine(firstPage, columns[0], tableTop, columns[3], tableTop);
+        drawLine(firstPage, columns[0], tableTop - rowHeight, columns[3], tableTop - rowHeight);
+        drawLine(firstPage, columns[0], tableBottom, columns[3], tableBottom);
+        columns.forEach((x) => drawLine(firstPage, x, tableTop, x, tableBottom));
+        firstPage.push(pdfText("CANT.", 49, tableTop - 15, 9, true));
+        firstPage.push(pdfText("DESCRIPCION", 100, tableTop - 15, 9, true));
+        firstPage.push(pdfText("IMPORTE", 478, tableTop - 15, 9, true));
         const rows = [...sheet.querySelectorAll("#itemsBody tr")];
         let total = 0;
         rows.forEach((row, index) => {
           const y = tableTop - rowHeight * (index + 1);
-          if (index > 0) drawLine(columns[0], y, columns[3], y);
+          if (index > 0) drawLine(firstPage, columns[0], y, columns[3], y);
           const quantity = row.querySelector(".cant").value;
           const description = row.querySelector(".desc").value;
           const amount = Number.parseFloat(row.querySelector(".importe").value) || 0;
           total += amount;
-          commands.push(pdfText(quantity, 50, y - 15, 9));
-          commands.push(pdfText(description.slice(0, 55), 98, y - 15, 9));
+          firstPage.push(pdfText(quantity, 50, y - 15, 9));
+          firstPage.push(pdfText(description.slice(0, 55), 98, y - 15, 9));
           const amountText = amount.toFixed(2);
-          commands.push(pdfText(amountText, 544 - amountText.length * 5, y - 15, 9));
+          firstPage.push(pdfText(amountText, 544 - amountText.length * 5, y - 15, 9));
         });
-        commands.push(pdfText(`Total: ${total.toFixed(2)}`, 447, tableBottom - 24, 11, true));
-        commands.push(pdfText(`Senado $: ${sheet.querySelector("#valorDeclarado").value || ""}`, 42, tableBottom - 48, 10));
-        const stream = commands.join("\n");
+        firstPage.push(pdfText(`Total: ${total.toFixed(2)}`, 447, tableBottom - 24, 11, true));
+        firstPage.push(pdfText(`Senado $: ${sheet.querySelector("#valorDeclarado").value || ""}`, 42, tableBottom - 48, 10));
+
+        const number = sheet.querySelector("#presupuestoNum").value;
+        const customer = sheet.querySelector("#senores").value;
+        detailPage.push(pdfText("Bambino Construcciones", 42, 795, 17, true));
+        detailPage.push(pdfText("DETALLE DEL PRESUPUESTO", 42, 758, 13, true));
+        detailPage.push(pdfText(`Presupuesto N: ${number}`, 42, 735, 10));
+        detailPage.push(pdfText(`Cliente: ${customer}`, 42, 715, 10));
+        const detailText = document.querySelector("#budget-detail-text").value;
+        const detailLines = detailText.split(/\r?\n/).flatMap((paragraph) => {
+          if (!paragraph.trim()) return [""];
+          const words = paragraph.trim().split(/\s+/);
+          const wrapped = [];
+          let line = "";
+          words.forEach((word) => {
+            while (word.length > 95) {
+              if (line) { wrapped.push(line); line = ""; }
+              wrapped.push(word.slice(0, 95));
+              word = word.slice(95);
+            }
+            if (line && `${line} ${word}`.length > 95) {
+              wrapped.push(line);
+              line = word;
+            } else {
+              line = line ? `${line} ${word}` : word;
+            }
+          });
+          if (line) wrapped.push(line);
+          return wrapped;
+        });
+        detailLines.slice(0, 48).forEach((line, index) => {
+          detailPage.push(pdfText(line, 42, 685 - index * 13, 10));
+        });
+        const streams = [firstPage.join("\n"), detailPage.join("\n")];
         const objects = [
           "<< /Type /Catalog /Pages 2 0 R >>",
-          "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+          "<< /Type /Pages /Kids [3 0 R 7 0 R] /Count 2 >>",
           "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
           "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
           "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
-          `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`
+          `<< /Length ${streams[0].length} >>\nstream\n${streams[0]}\nendstream`,
+          "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 8 0 R >>",
+          `<< /Length ${streams[1].length} >>\nstream\n${streams[1]}\nendstream`
         ];
         let pdf = "%PDF-1.4\n";
         const offsets = [0];
@@ -2836,7 +2905,9 @@
       content.addEventListener("input", (event) => {
         if (event.target.id === "project-search") filterProjects();
         if (event.target.id === "client-search") filterClients();
-        if (event.target.closest(".client-budget-sheet")) saveDocumentDraft("client-budget");
+        if (event.target.id === "senores") content.querySelector("#budget-detail-customer").textContent = event.target.value;
+        if (event.target.id === "presupuestoNum") content.querySelector("#budget-detail-number").textContent = event.target.value;
+        if (event.target.closest(".client-budget-sheet, .client-budget-detail-sheet")) saveDocumentDraft("client-budget");
         if (event.target.closest(".materials-list-sheet")) saveDocumentDraft("materials-list");
         if (event.target.closest(".cut-calculator")) {
           updateCutCalculator();
@@ -2849,7 +2920,9 @@
       });
       content.addEventListener("change", (event) => {
         if (event.target.id === "project-filter") filterProjects();
-        if (event.target.closest(".client-budget-sheet")) saveDocumentDraft("client-budget");
+        if (event.target.id === "senores") content.querySelector("#budget-detail-customer").textContent = event.target.value;
+        if (event.target.id === "presupuestoNum") content.querySelector("#budget-detail-number").textContent = event.target.value;
+        if (event.target.closest(".client-budget-sheet, .client-budget-detail-sheet")) saveDocumentDraft("client-budget");
         if (event.target.closest(".materials-list-sheet")) saveDocumentDraft("materials-list");
         if (event.target.closest(".cut-calculator")) {
           const row = event.target.closest("#cut-list-rows tr");
