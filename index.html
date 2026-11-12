@@ -439,7 +439,7 @@
       body:has(.cut-calculator) .cut-calculator,
       body:has(.cut-calculator) .cut-calculator * { visibility: visible !important; }
       body:has(.cut-calculator) .cut-calculator { position: absolute; inset: 0 auto auto 0; width: 100%; }
-      .cut-actions, .cut-line-remove { display: none !important; }
+      .cut-actions, .cut-line-remove, .cut-labor-card { display: none !important; }
       .cut-card { padding: 10px; border: 0; box-shadow: none; }
       .cut-fields input, .cut-lines input, .cut-lines select { min-height: auto; padding: 2px; border-color: transparent; appearance: none; }
       .cut-lines th, .cut-lines td { padding: 5px 3px; border-top: 1px solid #ccc; color: #000; font-size: 9px; }
@@ -1782,7 +1782,7 @@
               <div class="cut-lines-wrap"><table class="cut-lines"><thead><tr><th>DESCRIPCIÓN</th><th>MATERIAL</th><th>ANCHO (cm)</th><th>LARGO (cm)</th><th>CANT. / m</th><th>TAPACANTO DE PLACA</th><th>COSTO</th><th></th></tr></thead><tbody id="cut-list-rows">${rows.map((row) => cutListRow(row)).join("")}</tbody></table></div>
               <p class="cut-note">Melamina: se cobra solo el área de los cortes, sin sumar la placa ni los sobrantes. Tornillos, tarugos y soportes: cantidad × precio unitario. Metro lineal: metros × precio por metro. El cálculo no acomoda los cortes ni incluye el ancho del disco.</p>
             </div>
-            <div class="cut-card">
+            <div class="cut-card cut-labor-card">
               <div class="card-head"><div><h2 class="card-title">Mano de obra</h2><div class="card-hint">El porcentaje se calcula sobre la suma de materiales y tapacanto.</div></div></div>
               <label class="labor-mode-field">Forma de calcular
                 <select class="select" data-cut-field="labor-mode" aria-label="Forma de calcular la mano de obra">
