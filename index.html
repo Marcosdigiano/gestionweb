@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#171717">
-  <meta name="description" content="Panel de gestión de obras de Bamino Construcciones.">
-  <title>Bamino Construcciones · Gestión de obras</title>
+  <meta name="description" content="Panel de gestión de obras de Bambino Construcciones.">
+  <link rel="icon" type="image/png" href="imge/logo-circular.png">
+  <title>Bambino Construcciones · Gestión de obras</title>
   <style>
     :root {
       color-scheme: light;
@@ -271,6 +272,7 @@
     .client-budget-sheet th, .client-budget-sheet td { height: 22px; padding: 3px 6px; text-align: center; }
     .client-budget-sheet td.input-cell input { width: 90%; margin: 0; padding: 2px; border: 0; font-family: monospace; font-size: 12px; }
     .client-budget-sheet .right-align { padding-right: 10px; text-align: right; }
+    .client-budget-sheet #total { display: block; width: 100%; overflow-wrap: anywhere; text-align: right; font-family: monospace; font-weight: 700; }
     .client-budget-sheet .budget-footer { margin-top: 20px; }
     .client-budget-sheet .budget-actions { margin-top: 15px; text-align: center; }
     .client-budget-sheet .budget-actions button { padding: 5px 10px; border: 1px solid #777; border-radius: 3px; color: #000; background: #f5f5f5; font: 12px Arial, sans-serif; }
@@ -283,9 +285,26 @@
     .client-budget-detail-sheet .detail-heading { padding-bottom: 8px; border-bottom: 2px solid #000; }
     .client-budget-detail-sheet .detail-identification { display: flex; justify-content: space-between; gap: 16px; margin: 12px 0; }
     .client-budget-detail-sheet .detail-identification strong { font-weight: 700; }
-    .client-budget-detail-sheet textarea {
+    .client-budget-detail-sheet .detail-editor-actions { margin: 0 0 8px; }
+    .client-budget-detail-sheet .detail-editor-actions button {
+      padding: 5px 10px; border: 1px solid #777; border-radius: 3px; color: #000; background: #f5f5f5;
+      font: 12px Arial, sans-serif;
+    }
+    .client-budget-detail-sheet .detail-editor {
       display: block; width: 100%; min-height: 520px; padding: 8px 0; border: 0; border-radius: 0;
-      color: #000; background: transparent; font: 13px/1.6 Arial, sans-serif; resize: vertical;
+      color: #000; background: transparent; font: 13px/1.6 Arial, sans-serif; white-space: pre-wrap; overflow-wrap: anywhere;
+    }
+    .client-budget-detail-sheet .detail-editor:focus { outline: none; }
+    .client-budget-detail-sheet .detail-editor img { display: block; max-width: 100%; max-height: 280px; margin: 8px 0; object-fit: contain; }
+    .client-budget-detail-sheet .detail-editor:empty::before { color: #888; content: attr(data-placeholder); }
+    .client-budget-detail-sheet [hidden] { display: none !important; }
+    .client-budget-detail-sheet .detail-editor-actions button:focus-visible { outline: 2px solid #777; outline-offset: 2px; }
+    .client-budget-detail-sheet .detail-editor-actions button:active { background: #e8e8e8; }
+    .client-budget-detail-sheet .detail-editor-actions button:hover { background: #eee; }
+    .client-budget-detail-sheet .detail-editor img + br { display: none; }
+    .client-budget-detail-sheet .detail-editor img {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .materials-list-sheet { width: min(980px, 100%); margin: 0 auto; padding: 24px; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: var(--shadow); }
     .materials-list-details { display: grid; gap: 10px; margin-bottom: 16px; }
@@ -402,7 +421,9 @@
       .client-budget-sheet input, .client-budget-sheet button { border-color: transparent; background: transparent; box-shadow: none; font-size: 12px; appearance: none; }
       .client-budget-sheet input[readonly] { border-bottom: 1px solid #000 !important; }
       .client-budget-sheet .budget-actions { display: none !important; visibility: hidden !important; }
-      .client-budget-detail-sheet textarea { min-height: 650px; border: 0; outline: 0; resize: none; overflow: hidden; }
+      .client-budget-detail-sheet .detail-editor-actions { display: none !important; }
+      .client-budget-detail-sheet .detail-editor { min-height: 650px; border: 0; outline: 0; }
+      .client-budget-detail-sheet .detail-editor img { max-height: 240px; }
       body:has(.materials-list-sheet) * { visibility: hidden !important; }
       body:has(.materials-list-sheet) .materials-list-sheet,
       body:has(.materials-list-sheet) .materials-list-sheet * { visibility: visible !important; }
@@ -533,19 +554,19 @@
     <button class="nav-backdrop" id="nav-backdrop" type="button" aria-label="Cerrar menú" aria-hidden="true" tabindex="-1"></button>
     <aside class="sidebar" id="sidebar-nav-panel">
       <div class="brand">
-        <img class="brand-mark" src="imge/logo.png" alt="Logo de Bamino Construcciones">
-        <div class="brand-copy"><div class="brand-name">GESTIÓN DE OBRAS</div><div class="brand-caption">PANEL BAMINO</div></div>
+        <img class="brand-mark" src="imge/logo-circular.png" alt="Logo de Bambino Construcciones">
+        <div class="brand-copy"><div class="brand-name">GESTIÓN DE OBRAS</div><div class="brand-caption">PANEL BAMBINO</div></div>
       </div>
       <div class="nav-label">Espacio de trabajo</div>
       <nav class="nav" aria-label="Navegación principal" id="navigation"></nav>
       <div class="sidebar-bottom">
         <div class="team-label">Panel de gestión</div>
-        <div class="team-name">Bamino Construcciones</div>
+        <div class="team-name">Bambino Construcciones</div>
       </div>
     </aside>
     <main class="main">
       <header class="topbar">
-        <div class="crumb"><span>Bamino Construcciones</span><span aria-hidden="true"> / </span><strong id="breadcrumb">Panel</strong></div>
+        <div class="crumb"><span>Bambino Construcciones</span><span aria-hidden="true"> / </span><strong id="breadcrumb">Panel</strong></div>
         <input id="backup-file" type="file" accept="application/json,.json" hidden>
       </header>
       <div class="content" id="content" aria-live="polite"></div>
@@ -990,7 +1011,7 @@
       }
       function renderAuth(message = "") {
         const firstUser = authUsers.length === 0;
-        authContent.innerHTML = `<div class="auth-brand"><img src="imge/logo.png" alt=""><strong>BAMINO CONSTRUCCIONES</strong></div>
+        authContent.innerHTML = `<div class="auth-brand"><img src="imge/logo-circular.png" alt=""><strong>BAMBINO CONSTRUCCIONES</strong></div>
           <h1>${firstUser ? "Crear usuario inicial" : "Iniciar sesión"}</h1>
           <p>${firstUser ? "Crea la primera cuenta para habilitar el acceso a la aplicación." : "Ingresa con tu usuario y contraseña para continuar."}</p>
           <p>Este acceso se guarda en este navegador y dispositivo; no reemplaza la autenticación de un servidor.</p>
@@ -1130,6 +1151,7 @@
         if (page === "client-budget") {
           const sheet = content.querySelector(".client-budget-sheet");
           if (!sheet) return;
+          const detailEditor = content.querySelector("#budget-detail-text");
           state.documents.clientBudget = {
             number: sheet.querySelector("#presupuestoNum").value,
             date: sheet.querySelector("#fecha").value,
@@ -1137,14 +1159,15 @@
             address: sheet.querySelector("#domicilio").value,
             cash: sheet.querySelector("#contado").checked,
             installments: sheet.querySelector("#ctaCte").checked,
-            total: sheet.querySelector("#total").value,
+            total: sheet.querySelector("#total").textContent.trim(),
             deposit: sheet.querySelector("#valorDeclarado").value,
             items: [...sheet.querySelectorAll("#itemsBody tr")].map((row) => ({
               quantity: row.querySelector(".cant").value,
               description: row.querySelector(".desc").value,
               amount: row.querySelector(".importe").value
             })),
-            detailText: content.querySelector("#budget-detail-text").value
+            detailText: detailEditor.innerText,
+            detailHtml: detailEditor.innerHTML
           };
           persist();
           return;
@@ -1225,7 +1248,7 @@
         const url = URL.createObjectURL(file);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `respaldo-bamino-${day(0)}.json`;
+        link.download = `respaldo-bambino-${day(0)}.json`;
         document.body.append(link);
         link.click();
         link.remove();
@@ -1245,7 +1268,7 @@
       }
       async function restoreBackup(file) {
         const backup = JSON.parse(await file.text());
-        if (!isValidBackup(backup)) throw new Error("El archivo no contiene un respaldo válido de Bamino Construcciones.");
+        if (!isValidBackup(backup)) throw new Error("El archivo no contiene un respaldo válido de Bambino Construcciones.");
         if (!window.confirm("Restaurar el respaldo reemplazará los datos actuales por los datos del archivo. ¿Deseas continuar?")) return;
         state = backup.data;
         if (!state.documents || typeof state.documents !== "object") state.documents = {};
@@ -1515,6 +1538,9 @@
         const detailText = draft.detailText ?? (Array.isArray(draft.detailItems)
           ? draft.detailItems.map((item) => [item.quantity, item.item, item.description].filter(Boolean).join(" - ")).filter(Boolean).join("\n")
           : "");
+        const detailContent = typeof draft.detailHtml === "string"
+          ? safeBudgetDetailHtml(draft.detailHtml)
+          : safe(detailText);
         const itemRows = Array.from({ length: Math.max(15, items.length) }, (_, index) => {
           const item = items[index] || {};
           return `<tr>
@@ -1550,9 +1576,9 @@
                 </div>
                 <div class="budget-items">
                   <table>
-                    <thead><tr><th style="width:8%">CANT.</th><th style="width:68%">DESCRIPCION</th><th style="width:24%">IMPORTE</th></tr></thead>
+                    <thead><tr><th style="width:8%">CANT.</th><th style="width:60%">DESCRIPCION</th><th style="width:32%">IMPORTE</th></tr></thead>
                     <tbody id="itemsBody">${itemRows}</tbody>
-                    <tfoot><tr><td colspan="2" class="right-align"><strong>Total:</strong></td><td><input type="text" id="total" readonly value="${safe(draft.total || "0.00")}" aria-label="Total"></td></tr></tfoot>
+                    <tfoot><tr><td colspan="2" class="right-align"><strong>Total:</strong></td><td><output id="total" aria-label="Total">${safe(draft.total || "0.00")}</output></td></tr></tfoot>
                   </table>
                 </div>
                 <div class="budget-footer"><label for="valorDeclarado">Señado $</label><input type="number" id="valorDeclarado" value="${safe(draft.deposit || "")}" style="width:150px"></div>
@@ -1573,8 +1599,105 @@
               <div><strong>Cliente:</strong> <span id="budget-detail-customer">${safe(draft.customer || "")}</span></div>
               <div><strong>Presupuesto Nº:</strong> <span id="budget-detail-number">${safe(draft.number || "0001 - 00001")}</span></div>
             </div>
-            <textarea id="budget-detail-text" aria-label="Texto libre para detallar el presupuesto" placeholder="Escribe aquí el detalle del presupuesto...">${safe(detailText)}</textarea>
+            <div class="detail-editor-actions">
+              <button type="button" data-budget-add-images>Agregar imágenes</button>
+              <input id="budget-detail-images" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+            </div>
+            <div id="budget-detail-text" class="detail-editor" contenteditable="true" role="textbox" aria-label="Texto libre para detallar el presupuesto" aria-multiline="true" data-placeholder="Escribe aquí el detalle del presupuesto...">${detailContent}</div>
           </section>`;
+      }
+      function safeBudgetDetailHtml(value) {
+        const parsed = new DOMParser().parseFromString(String(value), "text/html");
+        const serialize = (node) => [...node.childNodes].map((child) => {
+          if (child.nodeType === Node.TEXT_NODE) return safe(child.textContent);
+          if (child.nodeType !== Node.ELEMENT_NODE) return "";
+          const tag = child.tagName.toLowerCase();
+          if (tag === "br") return "<br>";
+          if (tag === "img") {
+            const src = child.getAttribute("src") || "";
+            if (!/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(src)) return "";
+            const width = Number(child.getAttribute("data-width")) || 0;
+            const height = Number(child.getAttribute("data-height")) || 0;
+            return `<img src="${safe(src)}" alt="${safe(child.getAttribute("alt") || "Imagen adjunta")}" data-width="${width}" data-height="${height}">`;
+          }
+          const content = serialize(child);
+          return tag === "div" || tag === "p" ? `${content}<br>` : content;
+        }).join("");
+        return serialize(parsed.body).replace(/(?:<br>)+$/, "");
+      }
+      async function budgetImageData(file) {
+        if (!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)) throw new Error("Elige una imagen JPG, PNG, WEBP o GIF.");
+        if (file.size > 15 * 1024 * 1024) throw new Error("La imagen supera el límite de 15 MB.");
+        if (typeof createImageBitmap !== "function") throw new Error("Este navegador no permite procesar imágenes para el presupuesto.");
+        const bitmap = await createImageBitmap(file);
+        const scale = Math.min(1, 1400 / Math.max(bitmap.width, bitmap.height));
+        const width = Math.max(1, Math.round(bitmap.width * scale));
+        const height = Math.max(1, Math.round(bitmap.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        try {
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("No se pudo procesar la imagen en este navegador.");
+          context.drawImage(bitmap, 0, 0, width, height);
+        } finally {
+          bitmap.close();
+        }
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
+        if (!blob) throw new Error("No se pudo procesar la imagen.");
+        return {
+          src: await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error || new Error("No se pudo leer la imagen."));
+            reader.readAsDataURL(blob);
+          }),
+          width,
+          height
+        };
+      }
+      function insertBudgetImage(editor, image, range) {
+        if (!range) {
+          range = document.createRange();
+          range.selectNodeContents(editor);
+          range.collapse(false);
+          if (editor.lastChild && editor.lastChild.nodeName !== "BR") range.insertNode(document.createElement("br"));
+          range.selectNodeContents(editor);
+          range.collapse(false);
+        }
+        range.deleteContents();
+        const img = document.createElement("img");
+        img.src = image.src;
+        img.alt = "Imagen adjunta al presupuesto";
+        img.dataset.width = String(image.width);
+        img.dataset.height = String(image.height);
+        const lineBreak = document.createElement("br");
+        range.insertNode(img);
+        range.setStartAfter(img);
+        range.insertNode(lineBreak);
+        range.setStartAfter(lineBreak);
+        range.collapse(true);
+        editor.focus();
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      async function addBudgetImages(editor, files, range = null) {
+        let inserted = 0;
+        for (const file of files) {
+          try {
+            insertBudgetImage(editor, await budgetImageData(file), range);
+            range = window.getSelection().getRangeAt(0).cloneRange();
+            inserted += 1;
+          } catch (error) {
+            console.error("No se pudo agregar una imagen al detalle del presupuesto:", error);
+            notify(error.message || "No se pudo agregar la imagen.");
+          }
+        }
+        if (inserted) {
+          saveDocumentDraft("client-budget");
+          notify(`${inserted === 1 ? "Imagen agregada" : `${inserted} imágenes agregadas`} al detalle.`);
+        }
       }
       function materialsListRow(item = {}) {
         return `<tr>
@@ -2079,7 +2202,7 @@
         const listPageCount = Math.max(1, Math.ceil(rows.length / pageSize));
         for (let pageIndex = 0; pageIndex < listPageCount; pageIndex++) {
           const commands = ["1 J 1 j"];
-          addText(commands, "BAMINO CONSTRUCCIONES - PLAN DE CORTE", 36, 28, 17, true, "0.13 0.13 0.13");
+          addText(commands, "BAMBINO CONSTRUCCIONES - PLAN DE CORTE", 36, 28, 17, true, "0.13 0.13 0.13");
           addText(commands, `Lista completa de piezas | ${rows.length} cortes | Medidas en centimetros`, 36, 55, 9, false, "0.35 0.35 0.35");
           addText(commands, `Placa: ${format(result.boardWidth)} x ${format(result.boardLength)} cm | Sierra: 0.5 cm | Escuadrado: 1 cm por borde`, 36, 72, 9, false, "0.35 0.35 0.35");
           if (listPageCount > 1) addText(commands, `Lista - pagina ${pageIndex + 1} de ${listPageCount}`, 692, 55, 8, false, "0.35 0.35 0.35");
@@ -2176,7 +2299,7 @@
         persist();
         content.querySelector("[data-optimizer-results]").innerHTML = cutOptimizerResultsMarkup(result);
         const file = new File([buildCutOptimizerPdf(draft, result)], `Plan-de-corte-${day(0)}.pdf`, { type: "application/pdf" });
-        const shareData = { files: [file], title: "Plan de corte - Bamino Construcciones", text: "Plano de corte y lista completa de piezas." };
+        const shareData = { files: [file], title: "Plan de corte - Bambino Construcciones", text: "Plano de corte y lista completa de piezas." };
         if (navigator.share && navigator.canShare?.(shareData)) {
           try {
             await navigator.share(shareData);
@@ -2204,7 +2327,6 @@
       }
       function buildClientBudgetPdf(sheet) {
         const firstPage = ["0 G", "0.7 w"];
-        const detailPage = ["0 G", "0.7 w"];
         const drawLine = (commands, x1, y1, x2, y2) => commands.push(`${x1} ${y1} m ${x2} ${y2} l S`);
         firstPage.push(pdfText("Bambino Construcciones", 42, 795, 17, true));
         firstPage.push(pdfText("De Marcos Gabriel Digiano", 42, 778, 9));
@@ -2246,62 +2368,162 @@
           const amountText = amount.toFixed(2);
           firstPage.push(pdfText(amountText, 544 - amountText.length * 5, y - 15, 9));
         });
-        firstPage.push(pdfText(`Total: ${total.toFixed(2)}`, 447, tableBottom - 24, 11, true));
+        const totalText = `Total: ${total.toFixed(2)}`;
+        const totalFontSize = Math.min(11, 511 / (totalText.length * 0.6));
+        firstPage.push(pdfText(totalText, 553 - totalText.length * totalFontSize * 0.6, tableBottom - 24, totalFontSize, true));
         firstPage.push(pdfText(`Senado $: ${sheet.querySelector("#valorDeclarado").value || ""}`, 42, tableBottom - 48, 10));
 
         const number = sheet.querySelector("#presupuestoNum").value;
         const customer = sheet.querySelector("#senores").value;
-        detailPage.push(pdfText("Bambino Construcciones", 42, 795, 17, true));
-        detailPage.push(pdfText("DETALLE DEL PRESUPUESTO", 42, 758, 13, true));
-        detailPage.push(pdfText(`Presupuesto N: ${number}`, 42, 735, 10));
-        detailPage.push(pdfText(`Cliente: ${customer}`, 42, 715, 10));
-        const detailText = document.querySelector("#budget-detail-text").value;
-        const detailLines = detailText.split(/\r?\n/).flatMap((paragraph) => {
-          if (!paragraph.trim()) return [""];
-          const words = paragraph.trim().split(/\s+/);
-          const wrapped = [];
-          let line = "";
-          words.forEach((word) => {
-            while (word.length > 95) {
-              if (line) { wrapped.push(line); line = ""; }
-              wrapped.push(word.slice(0, 95));
-              word = word.slice(95);
+        const editor = document.querySelector("#budget-detail-text");
+        const detailPages = [];
+        const startDetailPage = (continuation = false) => {
+          const commands = ["0 G", "0.7 w", pdfText("Bambino Construcciones", 42, 795, 17, true)];
+          commands.push(pdfText(continuation ? "DETALLE DEL PRESUPUESTO (continuacion)" : "DETALLE DEL PRESUPUESTO", 42, 758, 13, true));
+          commands.push(pdfText(`Presupuesto N: ${number}`, 42, 735, 10));
+          commands.push(pdfText(`Cliente: ${customer}`, 42, 715, 10));
+          const page = { commands, images: [], y: 685 };
+          detailPages.push(page);
+          return page;
+        };
+        let detailPage = startDetailPage();
+        const nextDetailPage = () => { detailPage = startDetailPage(true); };
+        const detailParts = [];
+        const addDetailText = (text) => {
+          if (!text) return;
+          if (typeof detailParts[detailParts.length - 1] === "string") detailParts[detailParts.length - 1] += text;
+          else detailParts.push(text);
+        };
+        const collectDetailParts = (node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            addDetailText(node.textContent);
+            return;
+          }
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+          if (node.tagName === "IMG") {
+            detailParts.push({
+              src: node.getAttribute("src"),
+              width: Number(node.dataset.width) || node.naturalWidth,
+              height: Number(node.dataset.height) || node.naturalHeight
+            });
+            return;
+          }
+          if (node.tagName === "BR") {
+            addDetailText("\n");
+            return;
+          }
+          for (const child of node.childNodes) collectDetailParts(child);
+          if (["DIV", "P"].includes(node.tagName)) addDetailText("\n");
+        };
+        for (const child of editor.childNodes) collectDetailParts(child);
+        const pageBottom = 54;
+        const putTextLine = (line) => {
+          if (detailPage.y < pageBottom) nextDetailPage();
+          detailPage.commands.push(pdfText(line, 42, detailPage.y, 10));
+          detailPage.y -= 13;
+        };
+        for (const part of detailParts) {
+          if (typeof part === "string") {
+            for (const paragraph of part.replace(/\r/g, "").split("\n")) {
+              const words = paragraph.trim().split(/\s+/).filter(Boolean);
+              if (!words.length) {
+                if (!paragraph) putTextLine("");
+                continue;
+              }
+              let line = "";
+              for (let word of words) {
+                while (word.length > 95) {
+                  if (line) { putTextLine(line); line = ""; }
+                  putTextLine(word.slice(0, 95));
+                  word = word.slice(95);
+                }
+                if (line && `${line} ${word}`.length > 95) {
+                  putTextLine(line);
+                  line = word;
+                } else {
+                  line = line ? `${line} ${word}` : word;
+                }
+              }
+              if (line) putTextLine(line);
             }
-            if (line && `${line} ${word}`.length > 95) {
-              wrapped.push(line);
-              line = word;
-            } else {
-              line = line ? `${line} ${word}` : word;
-            }
-          });
-          if (line) wrapped.push(line);
-          return wrapped;
-        });
-        detailLines.slice(0, 48).forEach((line, index) => {
-          detailPage.push(pdfText(line, 42, 685 - index * 13, 10));
-        });
-        const streams = [firstPage.join("\n"), detailPage.join("\n")];
-        const objects = [
-          "<< /Type /Catalog /Pages 2 0 R >>",
-          "<< /Type /Pages /Kids [3 0 R 7 0 R] /Count 2 >>",
-          "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
-          "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
-          "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
-          `<< /Length ${streams[0].length} >>\nstream\n${streams[0]}\nendstream`,
-          "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 8 0 R >>",
-          `<< /Length ${streams[1].length} >>\nstream\n${streams[1]}\nendstream`
-        ];
-        let pdf = "%PDF-1.4\n";
+            continue;
+          }
+          if (!/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(part.src || "")) continue;
+          const imageData = Uint8Array.from(atob(part.src.slice(part.src.indexOf(",") + 1)), (char) => char.charCodeAt(0));
+          const scale = Math.min(1, 511 / Math.max(part.width, 1), 250 / Math.max(part.height, 1));
+          const width = Math.max(1, part.width * scale);
+          const height = Math.max(1, part.height * scale);
+          if (detailPage.y - height < pageBottom) nextDetailPage();
+          const imageName = `Im${detailPage.images.length}`;
+          detailPage.commands.push(`q ${width} 0 0 ${height} 42 ${detailPage.y - height} cm /${imageName} Do Q`);
+          detailPage.images.push({ name: imageName, width: part.width, height: part.height, data: imageData });
+          detailPage.y -= height + 12;
+        }
+
+        const encoder = new TextEncoder();
+        const objects = [null, null];
+        const reserveObject = () => { objects.push(null); return objects.length; };
+        const setObject = (id, value) => { objects[id - 1] = typeof value === "string" ? encoder.encode(value) : value; };
+        const makeStream = (value) => {
+          const data = typeof value === "string" ? encoder.encode(value) : value;
+          const prefix = encoder.encode(`<< /Length ${data.length} >>\nstream\n`);
+          const suffix = encoder.encode("\nendstream");
+          const object = new Uint8Array(prefix.length + data.length + suffix.length);
+          object.set(prefix);
+          object.set(data, prefix.length);
+          object.set(suffix, prefix.length + data.length);
+          return object;
+        };
+        const pagesId = 2;
+        const normalFontId = reserveObject();
+        const boldFontId = reserveObject();
+        setObject(normalFontId, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+        setObject(boldFontId, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+        const pageIds = [];
+        const addPdfPage = (commands, images = []) => {
+          const imageResources = [];
+          for (const image of images) {
+            const imageId = reserveObject();
+            const prefix = encoder.encode(`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.data.length} >>\nstream\n`);
+            const suffix = encoder.encode("\nendstream");
+            const imageObject = new Uint8Array(prefix.length + image.data.length + suffix.length);
+            imageObject.set(prefix);
+            imageObject.set(image.data, prefix.length);
+            imageObject.set(suffix, prefix.length + image.data.length);
+            setObject(imageId, imageObject);
+            imageResources.push(`/${image.name} ${imageId} 0 R`);
+          }
+          const streamId = reserveObject();
+          const pageId = reserveObject();
+          setObject(streamId, makeStream(commands.join("\n")));
+          const xObjects = imageResources.length ? `/XObject << ${imageResources.join(" ")} >>` : "";
+          setObject(pageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${normalFontId} 0 R /F2 ${boldFontId} 0 R >> ${xObjects} >> /Contents ${streamId} 0 R >>`);
+          pageIds.push(pageId);
+        };
+        addPdfPage(firstPage);
+        detailPages.forEach((page) => addPdfPage(page.commands, page.images));
+        setObject(1, "<< /Type /Catalog /Pages 2 0 R >>");
+        setObject(pagesId, `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`);
+        const header = encoder.encode("%PDF-1.4\n");
+        const parts = [header];
         const offsets = [0];
+        let pdfLength = header.length;
         objects.forEach((object, index) => {
-          offsets.push(pdf.length);
-          pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+          offsets.push(pdfLength);
+          const prefix = encoder.encode(`${index + 1} 0 obj\n`);
+          const suffix = encoder.encode("\nendobj\n");
+          parts.push(prefix, object, suffix);
+          pdfLength += prefix.length + object.length + suffix.length;
         });
-        const xrefOffset = pdf.length;
-        pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-        offsets.slice(1).forEach((offset) => { pdf += `${String(offset).padStart(10, "0")} 00000 n \n`; });
-        pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
-        return pdf;
+        const xrefOffset = pdfLength;
+        let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+        offsets.slice(1).forEach((offset) => { xref += `${String(offset).padStart(10, "0")} 00000 n \n`; });
+        xref += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+        parts.push(encoder.encode(xref));
+        const output = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+        let offset = 0;
+        parts.forEach((part) => { output.set(part, offset); offset += part.length; });
+        return output;
       }
       function downloadClientBudgetPdf(file) {
         const url = URL.createObjectURL(file);
@@ -2705,6 +2927,10 @@
       content.addEventListener("click", (event) => {
         const target = event.target.closest("button");
         if (!target) return;
+        if (target.hasAttribute("data-budget-add-images")) {
+          content.querySelector("#budget-detail-images").click();
+          return;
+        }
         if (target.hasAttribute("data-logout")) {
           lockApplication();
           return;
@@ -2814,7 +3040,7 @@
         if (target.hasAttribute("data-budget-calculate")) {
           const sheet = target.closest(".client-budget-sheet");
           const total = [...sheet.querySelectorAll(".importe")].reduce((sum, input) => sum + (Number.parseFloat(input.value) || 0), 0);
-          sheet.querySelector("#total").value = total.toFixed(2);
+          sheet.querySelector("#total").textContent = total.toFixed(2);
           saveDocumentDraft("client-budget");
           return;
         }
@@ -2919,6 +3145,12 @@
         if (event.target.closest(".price-list")) saveDocumentDraft("material-prices");
       });
       content.addEventListener("change", (event) => {
+        if (event.target.id === "budget-detail-images") {
+          const files = [...event.target.files];
+          event.target.value = "";
+          if (files.length) addBudgetImages(content.querySelector("#budget-detail-text"), files);
+          return;
+        }
         if (event.target.id === "project-filter") filterProjects();
         if (event.target.id === "senores") content.querySelector("#budget-detail-customer").textContent = event.target.value;
         if (event.target.id === "presupuestoNum") content.querySelector("#budget-detail-number").textContent = event.target.value;
@@ -2934,6 +3166,43 @@
         if (event.target.closest(".price-list")) {
           updatePriceRows();
           saveDocumentDraft("material-prices");
+        }
+      });
+      content.addEventListener("paste", (event) => {
+        const editor = event.target.closest("#budget-detail-text");
+        if (!editor) return;
+        event.preventDefault();
+        const clipboard = event.clipboardData;
+        const files = [...clipboard.items]
+          .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+          .map((item) => item.getAsFile())
+          .filter(Boolean);
+        const selection = window.getSelection();
+        let range = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+        if (range && !editor.contains(range.commonAncestorContainer)) range = null;
+        const text = clipboard.getData("text/plain");
+        if (text && range && editor.contains(range.commonAncestorContainer)) {
+          range.deleteContents();
+          const textNode = document.createTextNode(text);
+          range.insertNode(textNode);
+          range.setStartAfter(textNode);
+          range.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } else if (text) {
+          editor.append(document.createTextNode(text));
+          range = document.createRange();
+          range.selectNodeContents(editor);
+          range.collapse(false);
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+        if (files.length) {
+          const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+          range = currentRange && editor.contains(currentRange.commonAncestorContainer) ? currentRange.cloneRange() : range;
+          addBudgetImages(editor, files, range);
+        } else {
+          saveDocumentDraft("client-budget");
         }
       });
       const backupFile = document.getElementById("backup-file");
